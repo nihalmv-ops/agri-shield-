@@ -1,26 +1,38 @@
 # AgriShield — Protecting Farmers, Wildlife & Nature
 
-> **BCA Final Year College Project — Day 1: Professional UI/UX Foundation**  
+> **BCA Final Year College Project**  
 > A modern unified platform connecting farmers, citizens, and forest officers for direct agricultural trade, incident reporting, and AI-powered wildlife perimeter protection.
 
 ---
 
-## 🌿 Overview
+## 🌿 Key Architecture
 
-AgriShield bridges the critical gap between agricultural communities living along forest fringes and wildlife conservation authorities. It combines:
-1. **Direct Farmer Marketplace:** Zero-commission direct trade between verified growers and buyers.
-2. **AI Wildlife Perimeter Vision:** Smart trail camera detection of endangered and hazardous wildlife (Elephants, Leopards, Wild Boars, etc.).
-3. **Public Grievance & Crop Damage Redressal:** Transparent filing of human-wildlife conflict incidents with status tracking.
-4. **Forest Officer Command Center:** Dedicated administrative interface for range officers to monitor camera traps, verify threats, and dispatch patrol units.
+AgriShield consists of two primary modules:
+1. **Public Citizen & Farmer Portal (`/`):**
+   - Direct Farmer Marketplace (Zero broker fees)
+   - Real-time Wildlife Sighting Radar
+   - Community Crop Damage & Grievance Submissions
+   - Simulated Edge AI Trail Camera Viewfinder
+   - Citizen / Farmer User Profiles
+
+2. **Forest Officer Administrative Module (`/officer/*`):**
+   - **NOTE:** In AgriShield, the **Forest Officer is the Administrator**. There is no separate "Admin" role or dashboard.
+   - Command Dashboard with 4 core monitoring metrics
+   - Emergency Wildlife Alert dossier with interactive Map Locator
+   - Public Grievance Verification & Compensation Sanction workflow
+   - Registered Citizens Directory (`/officer/users`)
+   - Registered Cultivators Directory (`/officer/farmers`)
+   - Real-time Community & Sensor Activity Timeline (`/officer/activity`)
+   - Official Service Profile & Station Jurisdiction (`/officer/profile`)
 
 ---
 
-## 🎨 Tech Stack (Day 1 Frontend Foundation)
+## 🎨 Tech Stack
 
 - **Library / Framework:** React 18+
 - **Build Tool:** Vite
-- **Styling:** Tailwind CSS (Custom Nature-Tech Palette: Deep Forest `#063B2A`, Emerald `#10B981`, Mint `#34D399`, `#071A14`)
-- **Routing:** React Router DOM (v6+)
+- **Styling:** Tailwind CSS (Custom Nature-Tech Palette: Deep Forest `#063B2A`, Emerald `#10B981`, Mint `#34D399`, Dark `#071A14`)
+- **Routing:** React Router DOM
 - **Iconography:** Lucide React Icons
 - **Language:** JavaScript (JSX)
 
@@ -28,101 +40,106 @@ AgriShield bridges the critical gap between agricultural communities living alon
 
 ## 📁 Project Structure
 
-```
-c:\Project\job\Agrisheld\
-├── .gitignore
-├── README.md
-└── frontend/
-    ├── public/
-    ├── src/
-    │   ├── assets/
-    │   │   └── mockup-reference.jpg
-    │   ├── components/
-    │   │   ├── Navbar.jsx           # Responsive navbar with search, notifications, mobile menu
-    │   │   ├── Footer.jsx           # Platform links, farmer resources & emergency desk
-    │   │   ├── Button.jsx           # Reusable button with variants (primary, glass, dark, danger)
-    │   │   ├── ProductCard.jsx      # Agricultural product card with wishlist & contact action
-    │   │   ├── FeatureCard.jsx      # Modern cards with Lucide icons
-    │   │   └── SectionTitle.jsx     # Badges, titles and subtitles
-    │   │
-    │   ├── data/
-    │   │   └── mockData.js          # Realistic Kerala farm crops, wildlife cameras, complaints
-    │   │
-    │   ├── pages/
-    │   │   ├── Home.jsx             # Cinematic hero with AI bounding box & feature showcase
-    │   │   ├── Marketplace.jsx      # Product search, category filters, location, sort, inquiry modal
-    │   │   ├── ProductDetails.jsx   # Detailed crop view, seller credentials, quantity selector
-    │   │   ├── Complaints.jsx       # Incident report form and status workflow tracker
-    │   │   ├── WildlifeAlerts.jsx   # Real-time sensor alerts with confidence gauges & threat dossier
-    │   │   ├── WildlifeCamera.jsx   # Edge AI camera preview HUD, telemetry, capture & dispatch
-    │   │   ├── Login.jsx            # Split-screen responsive authentication portal
-    │   │   ├── Register.jsx         # Role-based onboarding (Farmer vs Citizen)
-    │   │   ├── Profile.jsx          # User management with products, orders & alert preferences
-    │   │   │
-    │   │   └── officer/
-    │   │       ├── OfficerLogin.jsx     # Forest department badge & PIN authentication
-    │   │       ├── OfficerRegister.jsx  # Official ranger service registration
-    │   │       ├── OfficerDashboard.jsx # Command dashboard with 4 core metrics & actions
-    │   │       ├── OfficerAlerts.jsx    # Sensor threat verification register
-    │   │       └── OfficerComplaints.jsx# Public damage claim review & compensation workflow
-    │   │
-    │   ├── App.jsx                  # Route definitions & scroll restoration
-    │   ├── main.jsx                 # React root render
-    │   └── index.css                # Base Tailwind directives, glassmorphism & scan animations
-    ├── index.html                   # Favicon, Inter font, and metadata
-    ├── package.json
-    ├── tailwind.config.js           # Custom nature-tech color tokens
-    └── vite.config.js
+```text
+src/
+├── components/
+│   ├── Navbar.jsx                  # Public navbar
+│   ├── Footer.jsx                  # Public footer
+│   ├── Button.jsx                  # Reusable button with variants
+│   ├── ProductCard.jsx             # Farm produce card
+│   ├── FeatureCard.jsx             # Feature card
+│   ├── SectionTitle.jsx            # Section titles and badges
+│   │
+│   └── officer/                    # Dedicated Forest Officer components
+│       ├── OfficerLayout.jsx       # Administrative shell (Sidebar + Navbar)
+│       ├── OfficerSidebar.jsx      # Sticky navigation with active highlights
+│       ├── OfficerNavbar.jsx       # Header with notifications & profile
+│       ├── NotificationDropdown.jsx# Dropdown with live alerts & tickets
+│       ├── StatCard.jsx            # KPI cards (Alerts, Complaints, Verified)
+│       ├── AlertCard.jsx           # Sensor threat card with Verify button
+│       ├── ComplaintCard.jsx       # Incident card with status workflows
+│       └── StatusBadge.jsx         # Accessible badges (Pending, Verified, etc.)
+│
+├── data/
+│   ├── mockData.js                 # Public sample data
+│   ├── officerAlerts.js            # Wildlife camera telemetry & coordinates
+│   ├── complaints.js               # Citizen crop damage & sighting grievances
+│   ├── users.js                    # Registered citizen users
+│   ├── farmers.js                  # Registered farming collectives
+│   └── activity.js                 # Real-time sensor & marketplace event log
+│
+├── pages/
+│   ├── Home.jsx                    # Landing page with AI bounding box hero
+│   ├── Marketplace.jsx             # Produce catalog with multi-filters
+│   ├── ProductDetails.jsx          # Crop dossier & farmer request dialog
+│   ├── Complaints.jsx              # Incident report form & tracker
+│   ├── WildlifeAlerts.jsx          # Sensor radar & precautions modal
+│   ├── WildlifeCamera.jsx          # Edge AI camera preview HUD
+│   ├── Login.jsx                   # Public user login
+│   ├── Register.jsx                # Role-based onboarding
+│   ├── Profile.jsx                 # Citizen/Farmer profile
+│   │
+│   └── officer/                    # Dedicated Forest Officer Pages
+│       ├── OfficerLogin.jsx        # Authorized personnel login
+│       ├── OfficerRegister.jsx     # Ranger service registration
+│       ├── OfficerDashboard.jsx    # Command center with 4 KPIs & alerts
+│       ├── OfficerAlerts.jsx       # Full surveillance queue & filter
+│       ├── OfficerAlertDetails.jsx # Detailed threat dossier & Map view
+│       ├── OfficerComplaints.jsx   # Public grievance register & review
+│       ├── OfficerComplaintDetails.jsx # Compensation sanction & officer notes
+│       ├── OfficerUsers.jsx        # Registered citizen directory & view
+│       ├── OfficerFarmers.jsx      # Registered farmer collective directory
+│       ├── OfficerActivity.jsx     # Real-time event & sensor activity
+│       └── OfficerProfile.jsx      # Officer credentials & station sector
+│
+├── App.jsx                         # Main router configuration
+├── main.jsx                        # React entrypoint
+└── index.css                       # Tailwind base & scan animations
 ```
 
 ---
 
-## 🚦 Routes Created
+## 🚦 All Application Routes
 
+### Public Citizen / Farmer Routes
 | Route | Page | Purpose |
 |---|---|---|
-| `/` | `Home.jsx` | Cinematic landing page matching official prototype |
-| `/marketplace` | `Marketplace.jsx` | Search, category & location filtered crops |
-| `/marketplace/:id` | `ProductDetails.jsx` | Detailed product information & direct request |
-| `/complaints` | `Complaints.jsx` | File crop damage or wild animal intrusion incident |
-| `/wildlife-alerts` | `WildlifeAlerts.jsx` | Live wildlife perimeter radar & confidence feeds |
-| `/wildlife-camera` | `WildlifeCamera.jsx` | Interactive AI camera viewfinder with HUD overlays |
-| `/login` | `Login.jsx` | Split-screen user login |
-| `/register` | `Register.jsx` | Farmer / Citizen account registration |
-| `/profile` | `Profile.jsx` | Profile details, listed crops, orders & settings |
-| `/officer/login` | `OfficerLogin.jsx` | Official Forest Department Ranger entry |
-| `/officer/register` | `OfficerRegister.jsx` | Ranger badge enrolment |
-| `/officer/dashboard` | `OfficerDashboard.jsx` | Administrative command center with sidebar |
-| `/officer/alerts` | `OfficerAlerts.jsx` | Officer sensor verification queue |
-| `/officer/complaints` | `OfficerComplaints.jsx`| Officer citizen grievance & compensation tracker |
+| `/` | `Home.jsx` | Cinematic landing page |
+| `/marketplace` | `Marketplace.jsx` | Farm products catalog |
+| `/marketplace/:id` | `ProductDetails.jsx` | Product details & order request |
+| `/complaints` | `Complaints.jsx` | Citizen incident reporting form |
+| `/wildlife-alerts` | `WildlifeAlerts.jsx` | Public wildlife warning feed |
+| `/wildlife-camera` | `WildlifeCamera.jsx` | Interactive AI camera viewfinder |
+| `/login` | `Login.jsx` | Citizen / Farmer login |
+| `/register` | `Register.jsx` | Account registration |
+| `/profile` | `Profile.jsx` | User management |
+
+### Forest Officer (Administrator) Routes
+| Route | Page | Purpose |
+|---|---|---|
+| `/officer/login` | `OfficerLogin.jsx` | Officer entry with official credentials |
+| `/officer/register` | `OfficerRegister.jsx` | Department officer enrolment |
+| `/officer/dashboard` | `OfficerDashboard.jsx` | Command center with 4 KPIs & alert feed |
+| `/officer/alerts` | `OfficerAlerts.jsx` | Surveillance queue with filters |
+| `/officer/alerts/:id` | `OfficerAlertDetails.jsx` | Threat dossier, notes & location map |
+| `/officer/complaints` | `OfficerComplaints.jsx` | Public grievance redressal registry |
+| `/officer/complaints/:id` | `OfficerComplaintDetails.jsx`| Status updater, compensation & audit notes |
+| `/officer/users` | `OfficerUsers.jsx` | Registered citizens directory & modal |
+| `/officer/farmers` | `OfficerFarmers.jsx` | Registered farmers directory & products |
+| `/officer/activity` | `OfficerActivity.jsx` | Chronological event timeline |
+| `/officer/profile` | `OfficerProfile.jsx` | Officer record, station range & credentials |
 
 ---
 
-## 🚀 How to Run the Project
-
-1. Open your terminal in the project directory:
-   ```bash
-   cd c:\Project\job\Agrisheld\frontend
-   ```
-
-2. Install dependencies (already prepared):
-   ```bash
-   npm install
-   ```
-
-3. Start the Vite development server:
-   ```bash
-   npm run dev
-   ```
-
-4. Open your browser and navigate to the local URL (typically `http://localhost:5173`).
-
----
-
-## 📦 Build for Production
+## 🚀 Running the Project
 
 ```bash
-cd c:\Project\job\Agrisheld\frontend
+cd frontend
+npm install
+npm run dev
+```
+
+Build for production:
+```bash
 npm run build
 ```
-The optimized production bundle will be generated in `frontend/dist/`.

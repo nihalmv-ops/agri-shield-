@@ -319,3 +319,4 @@ const WildlifeCamera = () => {
 };
 
 export default WildlifeCamera;
+

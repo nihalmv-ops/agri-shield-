@@ -126,3 +126,4 @@ const ProductCard = ({ product, onContact }) => {
 };
 
 export default ProductCard;
+

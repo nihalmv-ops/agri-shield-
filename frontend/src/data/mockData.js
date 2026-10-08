@@ -394,3 +394,4 @@ export const sampleFeatures = [
     highlight: "100% Farm Fresh"
   }
 ];
+
