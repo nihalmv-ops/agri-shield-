@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { 
   Shield, 
@@ -12,15 +12,35 @@ import {
   UserCircle,
   ExternalLink,
   SlidersHorizontal,
-  ChevronDown
+  ChevronDown,
+  Heart,
+  Plus,
+  Package,
+  ShoppingBag,
+  PackagePlus
 } from 'lucide-react';
 import Button from './Button';
+import { getFavorites } from '../utils/marketplaceStorage';
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [favoritesCount, setFavoritesCount] = useState(0);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const updateFavCount = () => {
+      const favs = getFavorites();
+      setFavoritesCount(favs.length);
+    };
+
+    updateFavCount();
+    window.addEventListener('agrishield_favorites_updated', updateFavCount);
+    return () => {
+      window.removeEventListener('agrishield_favorites_updated', updateFavCount);
+    };
+  }, []);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -90,24 +110,18 @@ const Navbar = () => {
                 )}
               </NavLink>
             ))}
-            <a 
-              href="#mission" 
-              className="px-3.5 py-2 text-sm font-medium text-gray-200 hover:text-white hover:bg-emerald-900/20 rounded-lg transition-colors"
-            >
-              About
-            </a>
           </nav>
 
-          {/* Search, Notifications & Actions */}
-          <div className="hidden md:flex items-center gap-3">
+          {/* Search, Notifications, Favorites & Sell Button */}
+          <div className="hidden md:flex items-center gap-2.5">
             {/* Search Input Bar */}
             <form onSubmit={handleSearchSubmit} className="relative">
               <input
                 type="text"
-                placeholder="Search products, animals, locations..."
+                placeholder="Search products, spices..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-48 lg:w-64 pl-9 pr-8 py-1.5 text-xs bg-[#071A14]/70 border border-emerald-800/60 rounded-full text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400 transition-all focus:w-72"
+                className="w-40 lg:w-56 pl-9 pr-7 py-1.5 text-xs bg-[#071A14]/70 border border-emerald-800/60 rounded-full text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400 transition-all focus:w-64"
               />
               <Search className="w-3.5 h-3.5 text-emerald-400 absolute left-3 top-1/2 -translate-y-1/2" />
               {searchQuery && (
@@ -119,6 +133,21 @@ const Navbar = () => {
                 </button>
               )}
             </form>
+
+            {/* Favourites Button */}
+            <Link
+              to="/favourites"
+              className="relative p-2 text-gray-300 hover:text-rose-400 hover:bg-emerald-900/40 rounded-full transition-colors"
+              title="Saved Favourites"
+              aria-label="View saved favourites"
+            >
+              <Heart className="w-5 h-5" />
+              {favoritesCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-rose-500 text-white rounded-full text-[10px] font-black flex items-center justify-center ring-2 ring-[#063B2A] animate-scaleIn">
+                  {favoritesCount}
+                </span>
+              )}
+            </Link>
 
             {/* Notifications Button */}
             <div className="relative">
@@ -144,7 +173,7 @@ const Navbar = () => {
                       <p className="text-gray-500 text-[11px]">CAM-023 • 96% AI confidence</p>
                     </div>
                     <div className="py-2.5">
-                      <p className="font-semibold text-gray-900">🌾 New Fresh Harvest: Wayanad Pepper</p>
+                      <p className="font-semibold text-gray-900">🌾 Fresh Harvest: Wayanad Pepper</p>
                       <p className="text-gray-500 text-[11px]">By Spice World • 250 kg available</p>
                     </div>
                     <div className="py-2.5">
@@ -163,29 +192,57 @@ const Navbar = () => {
               )}
             </div>
 
+            {/* My Listings Link */}
+            <Link
+              to="/my-listings"
+              className="p-2 text-gray-300 hover:text-emerald-300 hover:bg-emerald-900/40 rounded-full transition-colors hidden xl:flex"
+              title="My Listings"
+            >
+              <Package className="w-5 h-5" />
+            </Link>
+
+            {/* Sell Product Button (Standout CTA) */}
+            <Link
+              to="/sell-product"
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#10B981] hover:bg-[#0ea371] text-[#071A14] font-black text-xs rounded-full shadow-glow-emerald transition-all transform hover:scale-102 active:scale-98"
+            >
+              <Plus className="w-4 h-4 stroke-[2.5]" />
+              <span>Sell Product</span>
+            </Link>
+
             {/* Auth Buttons */}
-            <div className="flex items-center gap-2">
-              <Button
+            <div className="flex items-center gap-1.5 pl-1 border-l border-emerald-800/60">
+              <Link
                 to="/login"
-                variant="outline"
-                size="sm"
-                className="border-emerald-700/60 text-white hover:bg-emerald-900/50 py-1.5 px-4"
+                className="px-3 py-1.5 text-xs font-semibold text-gray-200 hover:text-white hover:bg-emerald-900/40 rounded-lg transition-colors"
               >
                 Login
-              </Button>
-              <Button
-                to="/register"
-                variant="primary"
-                size="sm"
-                className="bg-[#10B981] hover:bg-[#0ea371] text-white py-1.5 px-5 font-semibold"
+              </Link>
+              <Link
+                to="/profile"
+                className="p-1.5 text-gray-300 hover:text-white hover:bg-emerald-900/40 rounded-full transition-colors"
+                title="User Profile"
               >
-                Register
-              </Button>
+                <UserCircle className="w-5 h-5" />
+              </Link>
             </div>
           </div>
 
-          {/* Mobile Menu Toggle Button */}
-          <div className="flex items-center gap-2 md:hidden">
+          {/* Mobile Right Bar: Heart, Bell, Menu */}
+          <div className="flex items-center gap-1 md:hidden">
+            <Link
+              to="/favourites"
+              className="relative p-2 text-gray-300 hover:text-rose-400"
+              aria-label="View favourites"
+            >
+              <Heart className="w-5 h-5" />
+              {favoritesCount > 0 && (
+                <span className="absolute 1 top-1 right-1 w-3.5 h-3.5 bg-rose-500 text-white rounded-full text-[9px] font-black flex items-center justify-center">
+                  {favoritesCount}
+                </span>
+              )}
+            </Link>
+
             <button
               onClick={() => setNotificationsOpen(!notificationsOpen)}
               className="p-2 text-gray-300 hover:text-white"
@@ -193,6 +250,7 @@ const Navbar = () => {
             >
               <Bell className="w-5 h-5" />
             </button>
+
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 text-gray-300 hover:text-white focus:outline-none"
@@ -219,7 +277,17 @@ const Navbar = () => {
             <Search className="w-4 h-4 text-emerald-400 absolute left-3 top-1/2 -translate-y-1/2" />
           </form>
 
-          <div className="space-y-1">
+          {/* Sell CTA on Mobile */}
+          <Link
+            to="/sell-product"
+            onClick={() => setMobileMenuOpen(false)}
+            className="flex items-center justify-center gap-2 w-full py-3 bg-[#10B981] text-[#071A14] rounded-2xl font-black text-xs shadow-glow-emerald"
+          >
+            <Plus className="w-4 h-4 stroke-[2.5]" />
+            <span>Post Free Agricultural Listing</span>
+          </Link>
+
+          <div className="space-y-1 pt-2">
             {navLinks.map((item) => (
               <NavLink
                 key={item.name}
@@ -241,10 +309,38 @@ const Navbar = () => {
                 )}
               </NavLink>
             ))}
+
+            <Link
+              to="/my-listings"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-gray-300 hover:bg-emerald-900/30 hover:text-white"
+            >
+              <div className="flex items-center gap-2">
+                <Package className="w-4 h-4 text-emerald-400" />
+                <span>My Listings</span>
+              </div>
+            </Link>
+
+            <Link
+              to="/favourites"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-gray-300 hover:bg-emerald-900/30 hover:text-white"
+            >
+              <div className="flex items-center gap-2">
+                <Heart className="w-4 h-4 text-rose-400" />
+                <span>Saved Favourites</span>
+              </div>
+              {favoritesCount > 0 && (
+                <span className="text-[10px] px-2 py-0.5 bg-rose-500 text-white font-bold rounded-full">
+                  {favoritesCount}
+                </span>
+              )}
+            </Link>
+
             <Link
               to="/officer/dashboard"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-emerald-400 bg-emerald-950/40 border border-emerald-800/50"
+              className="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-emerald-400 bg-emerald-950/40 border border-emerald-800/50 mt-2"
             >
               <span>Forest Officer Portal</span>
               <ShieldAlert className="w-4 h-4" />
@@ -288,4 +384,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-

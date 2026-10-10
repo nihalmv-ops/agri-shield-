@@ -1,331 +1,401 @@
-import React, { useState, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useSearchParams, Link } from 'react-router-dom';
 import { 
   Search, 
   Filter, 
   MapPin, 
   ArrowUpDown, 
-  ShoppingBag, 
+  PlusCircle, 
   Sparkles, 
   X, 
-  Check, 
-  Phone, 
-  User, 
+  SlidersHorizontal,
+  RefreshCw,
+  ShoppingBag,
+  TrendingUp,
   Tag
 } from 'lucide-react';
+import MarketplaceSearch from '../components/marketplace/MarketplaceSearch';
+import CategoryFilter from '../components/marketplace/CategoryFilter';
+import PriceFilter from '../components/marketplace/PriceFilter';
+import LocationFilter from '../components/marketplace/LocationFilter';
+import ProductGrid from '../components/marketplace/ProductGrid';
 import ProductCard from '../components/ProductCard';
 import Button from '../components/Button';
-import SectionTitle from '../components/SectionTitle';
-import { sampleProducts } from '../data/mockData';
+import { getProducts } from '../utils/marketplaceStorage';
 
 const Marketplace = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialSearch = searchParams.get('search') || '';
+  const initialCategory = searchParams.get('category') || 'All';
+  const initialDistrict = searchParams.get('district') || 'All Districts';
 
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Filter & Search states
   const [searchQuery, setSearchQuery] = useState(initialSearch);
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [selectedLocation, setSelectedLocation] = useState('All');
-  const [sortBy, setSortBy] = useState('featured');
-  const [selectedProductForContact, setSelectedProductForContact] = useState(null);
-  const [contactSuccess, setContactSuccess] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+  const [selectedDistrict, setSelectedDistrict] = useState(initialDistrict);
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [sortBy, setSortBy] = useState('newest'); // 'newest' | 'price-low' | 'price-high'
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
-  const categories = ['All', 'Fruits', 'Vegetables', 'Grains', 'Spices', 'Dairy', 'Other'];
-  const locations = ['All', 'Kozhikode', 'Malappuram', 'Idukki', 'Thrissur', 'Wayanad', 'Munnar', 'Palakkad'];
+  // Load from local storage utility on mount and sync on custom events
+  useEffect(() => {
+    const loadData = () => {
+      setLoading(true);
+      const data = getProducts();
+      setProducts(data);
+      setLoading(false);
+    };
 
-  // Filtered & Sorted products
-  const filteredProducts = useMemo(() => {
-    return sampleProducts.filter((product) => {
-      // Category match
-      const matchCategory = selectedCategory === 'All' || product.category.toLowerCase() === selectedCategory.toLowerCase();
+    loadData();
 
-      // Search match
-      const matchSearch = !searchQuery || 
-        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.seller.name.toLowerCase().includes(searchQuery.toLowerCase());
+    // Re-sync if products updated in another tab/action
+    const handleStorageChange = () => loadData();
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
-      // Location match
-      const matchLocation = selectedLocation === 'All' || product.location.toLowerCase().includes(selectedLocation.toLowerCase());
+  // Update query state if search params change
+  useEffect(() => {
+    if (searchParams.get('search') !== null) {
+      setSearchQuery(searchParams.get('search') || '');
+    }
+    if (searchParams.get('category') !== null) {
+      setSelectedCategory(searchParams.get('category') || 'All');
+    }
+  }, [searchParams]);
 
-      return matchCategory && matchSearch && matchLocation;
-    }).sort((a, b) => {
-      if (sortBy === 'price-low') return a.price - b.price;
-      if (sortBy === 'price-high') return b.price - a.price;
-      if (sortBy === 'rating') return b.rating - a.rating;
-      return 0; // featured / default
-    });
-  }, [selectedCategory, searchQuery, selectedLocation, sortBy]);
+  const handleSearchSubmit = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    const params = {};
+    if (searchQuery.trim()) params.search = searchQuery.trim();
+    if (selectedCategory !== 'All') params.category = selectedCategory;
+    if (selectedDistrict !== 'All Districts') params.district = selectedDistrict;
+    setSearchParams(params);
+  };
 
-  const handleClearFilters = () => {
+  const handleResetFilters = () => {
     setSearchQuery('');
     setSelectedCategory('All');
-    setSelectedLocation('All');
-    setSortBy('featured');
+    setSelectedDistrict('All Districts');
+    setMinPrice('');
+    setMaxPrice('');
+    setSortBy('newest');
     setSearchParams({});
   };
 
-  const handleContactSubmit = (e) => {
-    e.preventDefault();
-    setContactSuccess(true);
-    setTimeout(() => {
-      setContactSuccess(false);
-      setSelectedProductForContact(null);
-    }, 2000);
+  const handleApplyPricePreset = (min, max) => {
+    setMinPrice(min ? String(min) : '');
+    setMaxPrice(max ? String(max) : '');
   };
 
+  // Filter & Sort Logic
+  const filteredProducts = useMemo(() => {
+    return products
+      .filter((p) => {
+        // Search keyword
+        const query = searchQuery.toLowerCase().trim();
+        const matchesQuery = !query || 
+          p.name.toLowerCase().includes(query) ||
+          p.category.toLowerCase().includes(query) ||
+          (p.description && p.description.toLowerCase().includes(query)) ||
+          (p.sellerName && p.sellerName.toLowerCase().includes(query)) ||
+          (p.location && p.location.toLowerCase().includes(query)) ||
+          (p.district && p.district.toLowerCase().includes(query));
+
+        // Category filter
+        const matchesCategory = selectedCategory === 'All' || p.category.toLowerCase() === selectedCategory.toLowerCase();
+
+        // District filter
+        const matchesDistrict = selectedDistrict === 'All Districts' || 
+          (p.district && p.district.toLowerCase() === selectedDistrict.toLowerCase()) ||
+          (p.location && p.location.toLowerCase().includes(selectedDistrict.toLowerCase()));
+
+        // Price filter
+        const priceNum = Number(p.price);
+        const matchesMinPrice = minPrice === '' || priceNum >= Number(minPrice);
+        const matchesMaxPrice = maxPrice === '' || priceNum <= Number(maxPrice);
+
+        return matchesQuery && matchesCategory && matchesDistrict && matchesMinPrice && matchesMaxPrice;
+      })
+      .sort((a, b) => {
+        if (sortBy === 'price-low') return a.price - b.price;
+        if (sortBy === 'price-high') return b.price - a.price;
+        // Default newest by timestamp or ID
+        return (b.timestamp || 0) - (a.timestamp || 0);
+      });
+  }, [products, searchQuery, selectedCategory, selectedDistrict, minPrice, maxPrice, sortBy]);
+
+  // Featured listings section
+  const featuredProducts = useMemo(() => {
+    return products.filter((p) => p.featured && p.status === 'Available').slice(0, 4);
+  }, [products]);
+
+  const activeFilterCount = (selectedCategory !== 'All' ? 1 : 0) +
+    (selectedDistrict !== 'All Districts' ? 1 : 0) +
+    (minPrice !== '' || maxPrice !== '' ? 1 : 0) +
+    (searchQuery.trim() !== '' ? 1 : 0);
+
   return (
-    <div className="min-h-screen bg-[#F5F8F6] py-10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Header Header & Hero Banner */}
-        <div className="bg-gradient-to-r from-[#063B2A] to-[#071A14] rounded-3xl p-6 sm:p-10 text-white mb-10 shadow-soft-lg relative overflow-hidden">
-          <div className="relative z-10 max-w-2xl space-y-3">
-            <span className="text-[11px] font-bold uppercase tracking-wider px-3 py-1 bg-emerald-500/20 text-emerald-300 rounded-full border border-emerald-500/30">
-              Farm-to-Consumer Direct
-            </span>
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-              AgriShield Marketplace
-            </h1>
-            <p className="text-xs sm:text-sm text-emerald-100/80 leading-relaxed">
-              Buy directly from verified local Kerala farmers at fair transparent rates. Zero broker commission, freshly harvested crops, spices, and organic dairy.
-            </p>
+    <div className="min-h-screen bg-[#F5F8F6] text-[#071A14]">
+      
+      {/* 1. Hero Banner */}
+      <section className="bg-gradient-to-b from-[#063B2A] to-[#0A4B36] text-white pt-10 pb-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#10B981_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none"></div>
+
+        <div className="max-w-7xl mx-auto relative z-10 text-center space-y-4">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-900/70 border border-emerald-500/40 text-xs font-bold text-emerald-300">
+            <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Direct Agricultural Marketplace</span>
           </div>
-          
-          <div className="absolute right-0 bottom-0 opacity-10 pointer-events-none">
-            <ShoppingBag className="w-80 h-80 -mr-16 -mb-16 text-emerald-300" />
+
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white max-w-4xl mx-auto leading-tight">
+            Buy &amp; Sell Agricultural Products Directly
+          </h1>
+
+          <p className="text-sm sm:text-base text-gray-200 max-w-2xl mx-auto font-normal leading-relaxed">
+            Connect with farmers, discover fresh produce and find agricultural products near you — zero middlemen mark-ups.
+          </p>
+
+          {/* Search bar inside Hero */}
+          <div className="pt-6 max-w-4xl mx-auto">
+            <MarketplaceSearch
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              selectedDistrict={selectedDistrict}
+              onDistrictChange={setSelectedDistrict}
+              onSearchSubmit={handleSearchSubmit}
+            />
           </div>
         </div>
+      </section>
 
-        {/* Filter & Search Bar */}
-        <div className="bg-white rounded-2xl p-4 sm:p-6 border border-emerald-950/10 shadow-soft mb-8 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
-            
-            {/* Search Input (6 cols) */}
-            <div className="md:col-span-6 relative">
-              <input
-                type="text"
-                placeholder="Search products (e.g. Rice, Pepper, Honey, Vegetables)..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
-              />
-              <Search className="w-4 h-4 text-emerald-600 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              {searchQuery && (
+      {/* 2. Main Marketplace Content Area */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-10">
+        
+        {/* Category Pill Navigation */}
+        <div className="bg-white rounded-3xl p-5 sm:p-6 border border-emerald-950/10 shadow-soft">
+          <CategoryFilter
+            selectedCategory={selectedCategory}
+            onSelectCategory={(cat) => {
+              setSelectedCategory(cat);
+              const params = {};
+              if (searchQuery) params.search = searchQuery;
+              if (cat !== 'All') params.category = cat;
+              if (selectedDistrict !== 'All Districts') params.district = selectedDistrict;
+              setSearchParams(params);
+            }}
+          />
+        </div>
+
+        {/* Featured Listings Spotlight (Shown when no active keyword search) */}
+        {!searchQuery && selectedCategory === 'All' && selectedDistrict === 'All Districts' && featuredProducts.length > 0 && (
+          <section className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl sm:text-2xl font-black text-[#063B2A] flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-emerald-600" />
+                  <span>Featured Agricultural Listings</span>
+                </h2>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  High-demand verified crops, organic staples, and farming equipment
+                </p>
+              </div>
+
+              <span className="text-xs font-bold bg-emerald-100 text-[#063B2A] px-3 py-1 rounded-full">
+                Spotlight
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {featuredProducts.map((p) => (
+                <ProductCard key={p.id} product={p} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* 3. Filter Controls & Catalog Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+          
+          {/* Desktop Left Sidebar Filters */}
+          <aside className="hidden lg:block space-y-6 bg-white rounded-3xl p-6 border border-emerald-950/10 shadow-soft sticky top-28">
+            <div className="flex items-center justify-between pb-4 border-b border-gray-100">
+              <h3 className="font-extrabold text-[#063B2A] text-base flex items-center gap-2">
+                <SlidersHorizontal className="w-4 h-4 text-emerald-600" />
+                <span>Filters</span>
+              </h3>
+              {activeFilterCount > 0 && (
                 <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  type="button"
+                  onClick={handleResetFilters}
+                  className="text-xs font-bold text-emerald-600 hover:text-emerald-800 flex items-center gap-1"
                 >
-                  <X className="w-4 h-4" />
+                  <RefreshCw className="w-3 h-3" />
+                  <span>Reset All ({activeFilterCount})</span>
                 </button>
               )}
             </div>
 
-            {/* Location Selector (3 cols) */}
-            <div className="md:col-span-3 relative">
-              <div className="flex items-center bg-gray-50 border border-gray-200 rounded-xl px-3 py-2">
-                <MapPin className="w-4 h-4 text-emerald-600 shrink-0 mr-2" />
-                <select
-                  value={selectedLocation}
-                  onChange={(e) => setSelectedLocation(e.target.value)}
-                  className="w-full bg-transparent text-xs sm:text-sm text-gray-700 focus:outline-none cursor-pointer"
-                >
-                  <option value="All">All Kerala Locations</option>
-                  {locations.filter(l => l !== 'All').map(loc => (
-                    <option key={loc} value={loc}>{loc}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
+            {/* Price Filter */}
+            <PriceFilter
+              minPrice={minPrice}
+              maxPrice={maxPrice}
+              onMinPriceChange={setMinPrice}
+              onMaxPriceChange={setMaxPrice}
+              onApplyPreset={handleApplyPricePreset}
+              onReset={() => { setMinPrice(''); setMaxPrice(''); }}
+            />
 
-            {/* Sort Dropdown (3 cols) */}
-            <div className="md:col-span-3 relative">
-              <div className="flex items-center bg-gray-50 border border-gray-200 rounded-xl px-3 py-2">
-                <ArrowUpDown className="w-4 h-4 text-emerald-600 shrink-0 mr-2" />
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="w-full bg-transparent text-xs sm:text-sm text-gray-700 focus:outline-none cursor-pointer"
-                >
-                  <option value="featured">Featured / Best Match</option>
-                  <option value="price-low">Price: Low to High</option>
-                  <option value="price-high">Price: High to Low</option>
-                  <option value="rating">Highest Rated</option>
-                </select>
-              </div>
-            </div>
+            <hr className="border-gray-100" />
 
-          </div>
+            {/* District / Location Filter */}
+            <LocationFilter
+              selectedDistrict={selectedDistrict}
+              onSelectDistrict={setSelectedDistrict}
+            />
 
-          {/* Category Pills Row */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-1 no-scrollbar text-xs">
-            <span className="font-semibold text-gray-500 text-xs shrink-0 mr-1 flex items-center gap-1">
-              <Tag className="w-3.5 h-3.5" /> Categories:
-            </span>
-            {categories.map((cat) => {
-              const active = selectedCategory === cat;
-              return (
-                <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`px-3.5 py-1.5 rounded-full font-semibold transition-all whitespace-nowrap ${
-                    active
-                      ? 'bg-[#063B2A] text-white shadow-xs'
-                      : 'bg-gray-100 text-gray-700 hover:bg-emerald-50 hover:text-emerald-800'
-                  }`}
-                >
-                  {cat}
-                </button>
-              );
-            })}
+            <hr className="border-gray-100" />
 
-            {(selectedCategory !== 'All' || selectedLocation !== 'All' || searchQuery) && (
-              <button
-                onClick={handleClearFilters}
-                className="text-xs text-rose-600 hover:underline font-semibold ml-auto shrink-0 flex items-center gap-1"
+            {/* Sell CTA Mini Card */}
+            <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200/70 text-center space-y-2">
+              <span className="text-xs font-black text-[#063B2A] block">
+                Got crops or farming tools to sell?
+              </span>
+              <p className="text-[11px] text-gray-600">
+                List your produce directly to 10,000+ local buyers across Kerala.
+              </p>
+              <Link
+                to="/sell-product"
+                className="inline-flex items-center justify-center gap-1.5 w-full py-2 px-3 bg-[#063B2A] hover:bg-emerald-900 text-white font-bold text-xs rounded-xl shadow-xs transition-colors"
               >
-                <X className="w-3 h-3" /> Reset Filters
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Results Count & Meta */}
-        <div className="flex items-center justify-between mb-6 text-xs text-gray-500">
-          <span>Showing <strong>{filteredProducts.length}</strong> farm products found</span>
-          <span className="text-emerald-700 font-medium">100% Verified Kerala Farmers</span>
-        </div>
-
-        {/* Product Cards Grid */}
-        {filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {filteredProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onContact={(prod) => setSelectedProductForContact(prod)}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="bg-white rounded-3xl p-12 text-center border border-gray-200 space-y-4 max-w-md mx-auto my-12">
-            <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
-              <ShoppingBag className="w-8 h-8" />
+                <PlusCircle className="w-3.5 h-3.5" />
+                <span>Post Listing Free</span>
+              </Link>
             </div>
-            <h3 className="text-lg font-bold text-gray-900">No products matched your search</h3>
-            <p className="text-xs text-gray-500">
-              Try adjusting your filters, location, or search keywords.
-            </p>
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={handleClearFilters}
-              className="bg-[#10B981]"
-            >
-              Show All Products
-            </Button>
-          </div>
-        )}
+          </aside>
+
+          {/* Right Main Grid Container */}
+          <main className="lg:col-span-3 space-y-6">
+            
+            {/* Top Toolbar: Results count & Sort by */}
+            <div className="bg-white rounded-2xl p-4 border border-emerald-950/10 shadow-soft flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <span className="text-sm font-extrabold text-[#071A14]">
+                  Showing {filteredProducts.length} {filteredProducts.length === 1 ? 'Product' : 'Products'}
+                </span>
+                {(selectedCategory !== 'All' || selectedDistrict !== 'All Districts' || searchQuery) && (
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {selectedCategory !== 'All' ? `${selectedCategory} ` : ''}
+                    {selectedDistrict !== 'All Districts' ? `in ${selectedDistrict}` : ''}
+                    {searchQuery ? ` matching "${searchQuery}"` : ''}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2 self-end sm:self-auto">
+                {/* Mobile Filter Toggle Button */}
+                <button
+                  type="button"
+                  onClick={() => setMobileFilterOpen(true)}
+                  className="lg:hidden flex items-center gap-1.5 px-3 py-2 bg-gray-100 hover:bg-emerald-50 text-gray-800 rounded-xl text-xs font-bold border border-gray-200"
+                >
+                  <Filter className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Filters {activeFilterCount > 0 ? `(${activeFilterCount})` : ''}</span>
+                </button>
+
+                {/* Sort Dropdown */}
+                <div className="flex items-center gap-2 text-xs">
+                  <ArrowUpDown className="w-3.5 h-3.5 text-gray-400" />
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="bg-[#F5F8F6] text-xs font-bold text-gray-800 py-2 px-3 rounded-xl border border-gray-200 focus:outline-none focus:border-emerald-400 cursor-pointer"
+                  >
+                    <option value="newest">Recently Added</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Product Cards Grid */}
+            <ProductGrid
+              products={filteredProducts}
+              loading={loading}
+              emptyTitle="No Agricultural Listings Match Your Filters"
+              emptyMessage="We couldn't find any products matching your specific combination of category, location, and price. Try clearing your filters to explore all fresh produce."
+              onResetFilters={handleResetFilters}
+            />
+
+          </main>
+
+        </div>
 
       </div>
 
-      {/* Contact Seller Modal */}
-      {selectedProductForContact && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-fadeIn">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-emerald-900/10 space-y-5">
-            <div className="flex items-start justify-between pb-3 border-b border-gray-100">
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">
-                  Farmer Connect
-                </span>
-                <h3 className="text-lg font-extrabold text-gray-900 mt-1">
-                  Contact {selectedProductForContact.seller.name}
-                </h3>
-                <p className="text-xs text-gray-500">For {selectedProductForContact.name} ({selectedProductForContact.location})</p>
-              </div>
+      {/* Mobile Filters Slide-over / Modal */}
+      {mobileFilterOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs lg:hidden animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-md w-full max-h-[85vh] overflow-y-auto p-6 shadow-2xl border border-gray-200 space-y-6">
+            <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+              <h3 className="text-base font-black text-[#063B2A] flex items-center gap-2">
+                <SlidersHorizontal className="w-4 h-4 text-emerald-600" />
+                <span>Filter Marketplace</span>
+              </h3>
               <button
-                onClick={() => setSelectedProductForContact(null)}
-                className="text-gray-400 hover:text-gray-600 p-1 rounded-full"
+                type="button"
+                onClick={() => setMobileFilterOpen(false)}
+                className="p-1 text-gray-400 hover:text-gray-700 rounded-full"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {contactSuccess ? (
-              <div className="p-6 bg-emerald-50 border border-emerald-300 rounded-2xl text-center space-y-2">
-                <div className="w-12 h-12 bg-emerald-500 text-white rounded-full flex items-center justify-center mx-auto">
-                  <Check className="w-6 h-6" />
-                </div>
-                <h4 className="font-bold text-emerald-900 text-sm">Message Sent to Farmer!</h4>
-                <p className="text-xs text-emerald-700">
-                  {selectedProductForContact.seller.name} will call or WhatsApp you directly at your registered number.
-                </p>
-              </div>
-            ) : (
-              <form onSubmit={handleContactSubmit} className="space-y-4 text-xs">
-                <div>
-                  <label className="block font-bold text-gray-700 mb-1">Your Name</label>
-                  <input
-                    type="text"
-                    defaultValue="Arjun Menon"
-                    required
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold text-gray-700 mb-1">Your Phone / WhatsApp</label>
-                  <input
-                    type="tel"
-                    defaultValue="+91 98460 11223"
-                    required
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold text-gray-700 mb-1">Quantity Interested In</label>
-                  <input
-                    type="text"
-                    placeholder={`e.g. 10 ${selectedProductForContact.unit}`}
-                    defaultValue={`5 ${selectedProductForContact.unit}`}
-                    required
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold text-gray-700 mb-1">Message for Farmer</label>
-                  <textarea
-                    rows={2}
-                    placeholder="Ask about delivery, bulk pricing, or farm visit..."
-                    defaultValue="Hello, I am interested in purchasing this fresh harvest. Is delivery available?"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                  />
-                </div>
+            <PriceFilter
+              minPrice={minPrice}
+              maxPrice={maxPrice}
+              onMinPriceChange={setMinPrice}
+              onMaxPriceChange={setMaxPrice}
+              onApplyPreset={handleApplyPricePreset}
+              onReset={() => { setMinPrice(''); setMaxPrice(''); }}
+            />
 
-                <div className="pt-2 flex items-center justify-end gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setSelectedProductForContact(null)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    size="sm"
-                    className="bg-[#10B981] text-white"
-                  >
-                    Send Inquiry to Farmer
-                  </Button>
-                </div>
-              </form>
-            )}
+            <hr className="border-gray-100" />
+
+            <LocationFilter
+              selectedDistrict={selectedDistrict}
+              onSelectDistrict={(dist) => {
+                setSelectedDistrict(dist);
+              }}
+            />
+
+            <div className="pt-2 flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handleResetFilters}
+                className="flex-1 py-3 text-xs font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-2xl"
+              >
+                Reset All
+              </button>
+              <button
+                type="button"
+                onClick={() => setMobileFilterOpen(false)}
+                className="flex-1 py-3 text-xs font-black text-white bg-[#063B2A] hover:bg-emerald-900 rounded-2xl shadow-md"
+              >
+                Apply Filters
+              </button>
+            </div>
           </div>
         </div>
       )}
+
     </div>
   );
 };
 
 export default Marketplace;
-

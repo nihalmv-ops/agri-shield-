@@ -77,19 +77,19 @@ const Footer = () => {
             </h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/register?role=farmer" className="hover:text-emerald-300 transition-colors">Sell Products</Link>
+                <Link to="/sell-product" className="hover:text-emerald-300 transition-colors">Sell Produce (Free)</Link>
               </li>
               <li>
-                <Link to="/profile" className="hover:text-emerald-300 transition-colors">My Products</Link>
+                <Link to="/my-listings" className="hover:text-emerald-300 transition-colors">My Listings</Link>
+              </li>
+              <li>
+                <Link to="/favourites" className="hover:text-emerald-300 transition-colors">Saved Favourites</Link>
               </li>
               <li>
                 <Link to="/complaints" className="hover:text-emerald-300 transition-colors">Report Crop Damage</Link>
               </li>
               <li>
                 <Link to="/wildlife-alerts" className="hover:text-emerald-300 transition-colors">Boundary Alert Map</Link>
-              </li>
-              <li>
-                <Link to="/profile" className="hover:text-emerald-300 transition-colors">Farmer Subsidies & Aid</Link>
               </li>
             </ul>
           </div>

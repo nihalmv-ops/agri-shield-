@@ -7,6 +7,11 @@ import Footer from './components/Footer';
 import Home from './pages/Home';
 import Marketplace from './pages/Marketplace';
 import ProductDetails from './pages/ProductDetails';
+import SellProduct from './pages/SellProduct';
+import MyListings from './pages/MyListings';
+import EditProduct from './pages/EditProduct';
+import Favourites from './pages/Favourites';
+import SellerProfile from './pages/SellerProfile';
 import Complaints from './pages/Complaints';
 import WildlifeAlerts from './pages/WildlifeAlerts';
 import WildlifeCamera from './pages/WildlifeCamera';
@@ -75,8 +80,17 @@ function App() {
 
         {/* Public Citizen & Farmer Platform Routes */}
         <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
+        
+        {/* OLX-Style Agricultural Marketplace Routes */}
         <Route path="/marketplace" element={<PublicLayout><Marketplace /></PublicLayout>} />
         <Route path="/marketplace/:id" element={<PublicLayout><ProductDetails /></PublicLayout>} />
+        <Route path="/sell-product" element={<PublicLayout><SellProduct /></PublicLayout>} />
+        <Route path="/my-listings" element={<PublicLayout><MyListings /></PublicLayout>} />
+        <Route path="/edit-product/:id" element={<PublicLayout><EditProduct /></PublicLayout>} />
+        <Route path="/favourites" element={<PublicLayout><Favourites /></PublicLayout>} />
+        <Route path="/seller/:id" element={<PublicLayout><SellerProfile /></PublicLayout>} />
+
+        {/* Other Platform Features */}
         <Route path="/complaints" element={<PublicLayout><Complaints /></PublicLayout>} />
         <Route path="/wildlife-alerts" element={<PublicLayout><WildlifeAlerts /></PublicLayout>} />
         <Route path="/wildlife-camera" element={<PublicLayout><WildlifeCamera /></PublicLayout>} />

@@ -27,7 +27,8 @@ import Button from '../components/Button';
 import SectionTitle from '../components/SectionTitle';
 import FeatureCard from '../components/FeatureCard';
 import ProductCard from '../components/ProductCard';
-import { sampleProducts, sampleWildlifeAlerts, sampleFeatures } from '../data/mockData';
+import { sampleWildlifeAlerts, sampleFeatures } from '../data/mockData';
+import { getProducts } from '../utils/marketplaceStorage';
 
 const Home = () => {
   // Active wildlife preview animal
@@ -326,7 +327,7 @@ const Home = () => {
 
             {/* Product Cards Row/Grid (5 items as in prompt) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-5">
-              {sampleProducts.slice(0, 5).map((product) => (
+              {getProducts().slice(0, 5).map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
               
