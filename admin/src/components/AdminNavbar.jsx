@@ -270,3 +270,4 @@ const AdminNavbar = ({ onMenuClick }) => {
 };
 
 export default AdminNavbar;
+

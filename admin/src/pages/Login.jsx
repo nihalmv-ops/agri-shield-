@@ -109,7 +109,7 @@ const Login = () => {
             </div>
             <div className="flex items-center gap-2.5 text-gray-300">
               <CheckCircle2 className="w-4 h-4 text-[#10B981] shrink-0" />
-              <span>Marketplace Oversight</span>
+              <span>Buffer Conflict Radar</span>
             </div>
           </div>
         </div>
@@ -277,3 +277,4 @@ const Login = () => {
 };
 
 export default Login;
+

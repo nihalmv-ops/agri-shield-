@@ -109,3 +109,4 @@ const StatusBadge = ({ status, priority, size = 'sm', className = '' }) => {
 };
 
 export default StatusBadge;
+

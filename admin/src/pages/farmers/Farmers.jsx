@@ -9,7 +9,6 @@ import {
   Eye, 
   Phone, 
   MapPin, 
-  ShoppingBag, 
   AlertCircle, 
   CheckCircle2, 
   X, 
@@ -217,12 +216,12 @@ const Farmers = () => {
 
                 <div className="grid grid-cols-2 gap-2 text-xs bg-[#F5F8F6] p-3 rounded-2xl">
                   <div>
-                    <span className="text-[10px] text-gray-400 block font-bold">Acreage</span>
+                    <span className="text-[10px] text-gray-400 block font-bold">Landholding</span>
                     <span className="font-bold text-gray-900">{farmer.acres}</span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-gray-400 block font-bold">Listings</span>
-                    <span className="font-bold text-gray-900">{farmer.productsCount} Products</span>
+                    <span className="text-[10px] text-gray-400 block font-bold">Complaints</span>
+                    <span className="font-bold text-[#063B2A]">{farmer.complaintsCount} Grievances</span>
                   </div>
                   <div className="col-span-2 pt-1 border-t border-gray-200/60 flex items-center justify-between text-[11px]">
                     <span className="text-gray-500 flex items-center gap-1">
@@ -269,7 +268,7 @@ const Farmers = () => {
                   <th className="py-3.5 px-4">Location</th>
                   <th className="py-3.5 px-4">Phone</th>
                   <th className="py-3.5 px-4">Acreage</th>
-                  <th className="py-3.5 px-4">Catalog</th>
+                  <th className="py-3.5 px-4">Perimeter Sector</th>
                   <th className="py-3.5 px-4">Status</th>
                   <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
@@ -308,7 +307,7 @@ const Farmers = () => {
                     </td>
 
                     <td className="py-3.5 px-4 font-semibold text-gray-800">
-                      {f.productsCount} listings
+                      {f.sectorZone || f.location}
                     </td>
 
                     <td className="py-3.5 px-4">
@@ -338,3 +337,4 @@ const Farmers = () => {
 };
 
 export default Farmers;
+

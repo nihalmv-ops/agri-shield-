@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { 
   Activity, 
-  ShoppingBag, 
   MessageSquareWarning, 
   Radio, 
   CheckCircle2, 
@@ -17,7 +16,7 @@ import { activityFeed } from '../../data/activity';
 const OfficerActivity = () => {
   const [filterType, setFilterType] = useState('All');
 
-  const categories = ['All', 'product', 'complaint', 'alert', 'verification', 'farmer', 'patrol', 'broadcast'];
+  const categories = ['All', 'alert', 'complaint', 'verification', 'farmer', 'patrol', 'broadcast'];
 
   const filteredFeed = activityFeed.filter((item) => {
     if (filterType === 'All') return true;
@@ -26,8 +25,6 @@ const OfficerActivity = () => {
 
   const getIcon = (type) => {
     switch (type) {
-      case 'product':
-        return <ShoppingBag className="w-5 h-5 text-emerald-600" />;
       case 'complaint':
         return <MessageSquareWarning className="w-5 h-5 text-amber-600" />;
       case 'alert':
@@ -72,13 +69,13 @@ const OfficerActivity = () => {
         <div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 mb-1">
             <Activity className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Event Streaming</span>
+            <span>Incident Stream</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-[#063B2A]">
-            Marketplace &amp; Community Activity
+            Sensor Alerts &amp; Field Incident Activity
           </h1>
           <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
-            Real-time chronological timeline of crop listings, incident submissions, and camera trap alarms.
+            Real-time chronological timeline of AI camera trap catches, wild animal alerts, and citizen complaints.
           </p>
         </div>
 

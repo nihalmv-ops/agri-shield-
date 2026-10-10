@@ -26,3 +26,4 @@ const SearchBar = ({ value, onChange, onClear, placeholder = 'Search...', classN
 };
 
 export default SearchBar;
+

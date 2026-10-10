@@ -3,15 +3,15 @@
 export const activityFeed = [
   {
     id: "ACT-001",
-    type: "product",
-    icon: "ShoppingBag",
-    title: "New Product Listed",
-    subject: "Organic Rice (500 kg available)",
-    actor: "Farmer: Ramesh Kumar",
-    location: "Kozhikode, Kerala",
+    type: "alert",
+    icon: "Radio",
+    title: "AI Camera Animal Detection",
+    subject: "Asian Elephant identified by optical neural net (96% Confidence)",
+    actor: "Camera: CAM-023",
+    location: "Sultan Bathery, Wayanad",
     timestamp: "10 minutes ago",
-    badge: "Marketplace",
-    color: "emerald"
+    badge: "Optical Trigger",
+    color: "rose"
   },
   {
     id: "ACT-002",
@@ -66,7 +66,7 @@ export const activityFeed = [
     type: "farmer",
     icon: "Trees",
     title: "New Farmer Enrolled",
-    subject: "Palakkad Native Breeds Dairy registered 4 items",
+    subject: "Ksheera Farm holding enrolled into perimeter warning network",
     actor: "Farmer: Ksheera Native Dairy Co-op",
     location: "Palakkad, Kerala",
     timestamp: "4 hours ago",

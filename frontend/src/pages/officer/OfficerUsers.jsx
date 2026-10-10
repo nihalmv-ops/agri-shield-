@@ -215,8 +215,8 @@ const OfficerUsers = () => {
                 <strong className="text-emerald-800">{selectedUserModal.complaintsFiled} Reports</strong>
               </div>
               <div className="flex justify-between py-1">
-                <span className="text-gray-500">Marketplace Orders:</span>
-                <strong className="text-emerald-800">{selectedUserModal.purchasesCount} Purchases</strong>
+                <span className="text-gray-500">Wildlife Sighting Reports:</span>
+                <strong className="text-emerald-800">{selectedUserModal.wildlifeSightings || 2} Alerts Filed</strong>
               </div>
             </div>
 

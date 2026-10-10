@@ -102,3 +102,4 @@ const ComplaintCard = ({ complaint, onUpdateStatus, onVerify, className = '' }) 
 };
 
 export default ComplaintCard;
+

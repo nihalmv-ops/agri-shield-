@@ -116,8 +116,8 @@ const Users = () => {
               className="w-full bg-[#F5F8F6] py-2 px-3 rounded-xl border border-gray-200 text-gray-800 font-semibold focus:outline-none focus:border-emerald-300"
             >
               <option value="All">All Roles</option>
-              <option value="Farmer">Farmer (Producer)</option>
-              <option value="User">User (Consumer)</option>
+              <option value="Farmer">Farmer (Protected Buffer)</option>
+              <option value="Citizen">Resident / Citizen (Panchayat)</option>
             </select>
           </div>
 
@@ -253,3 +253,4 @@ const Users = () => {
 };
 
 export default Users;
+

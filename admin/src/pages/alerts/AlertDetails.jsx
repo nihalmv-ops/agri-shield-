@@ -354,3 +354,4 @@ const AlertDetails = () => {
 };
 
 export default AlertDetails;
+

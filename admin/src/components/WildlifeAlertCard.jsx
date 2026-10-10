@@ -106,3 +106,4 @@ const WildlifeAlertCard = ({ alert, onVerify, className = '' }) => {
 };
 
 export default WildlifeAlertCard;
+

@@ -6,7 +6,6 @@ import {
   MessageSquareWarning, 
   CheckCircle2, 
   Trees, 
-  ShoppingBag, 
   ShieldAlert, 
   Send, 
   Clock, 
@@ -24,7 +23,6 @@ const Activity = () => {
       case 'MessageSquareWarning': return <MessageSquareWarning className="w-4 h-4" />;
       case 'CheckCircle2': return <CheckCircle2 className="w-4 h-4" />;
       case 'Trees': return <Trees className="w-4 h-4" />;
-      case 'ShoppingBag': return <ShoppingBag className="w-4 h-4" />;
       case 'Send': return <Send className="w-4 h-4" />;
       default: return <ShieldAlert className="w-4 h-4" />;
     }
@@ -125,3 +123,4 @@ const Activity = () => {
 };
 
 export default Activity;
+

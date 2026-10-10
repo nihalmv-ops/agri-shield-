@@ -15,8 +15,6 @@ import Farmers from './pages/farmers/Farmers';
 import FarmerDetails from './pages/farmers/FarmerDetails';
 import Users from './pages/users/Users';
 import UserDetails from './pages/users/UserDetails';
-import Products from './pages/products/Products';
-import ProductDetails from './pages/products/ProductDetails';
 import Activity from './pages/Activity';
 import Profile from './pages/Profile';
 
@@ -61,9 +59,6 @@ function App() {
           <Route path="users" element={<Users />} />
           <Route path="users/:id" element={<UserDetails />} />
 
-          {/* Marketplace Oversight */}
-          <Route path="products" element={<Products />} />
-          <Route path="products/:id" element={<ProductDetails />} />
 
           {/* System Audit & Profile */}
           <Route path="activity" element={<Activity />} />

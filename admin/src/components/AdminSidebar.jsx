@@ -6,7 +6,6 @@ import {
   MessageSquareWarning, 
   Trees, 
   Users, 
-  ShoppingBag, 
   Activity, 
   UserCheck, 
   LogOut, 
@@ -26,35 +25,29 @@ const AdminSidebar = ({ isOpen, onClose }) => {
       ]
     },
     {
-      label: 'Wildlife',
+      label: 'Wildlife Defense',
       items: [
-        { name: 'Alerts', path: '/admin/alerts', icon: Radio, badge: '24' }
+        { name: 'Wildlife Alerts', path: '/admin/alerts', icon: Radio, badge: '24' }
       ]
     },
     {
-      label: 'Reports',
+      label: 'Grievance Redressal',
       items: [
-        { name: 'Complaints', path: '/admin/complaints', icon: MessageSquareWarning, badge: '12' }
+        { name: 'User Complaints', path: '/admin/complaints', icon: MessageSquareWarning, badge: '12' }
       ]
     },
     {
-      label: 'Community',
+      label: 'Perimeter Community',
       items: [
-        { name: 'Farmers', path: '/admin/farmers', icon: Trees, badge: '248' },
-        { name: 'Users', path: '/admin/users', icon: Users }
+        { name: 'Protected Farmers', path: '/admin/farmers', icon: Trees, badge: '248' },
+        { name: 'Citizens Directory', path: '/admin/users', icon: Users }
       ]
     },
     {
-      label: 'Marketplace',
+      label: 'Operations',
       items: [
-        { name: 'Products', path: '/admin/products', icon: ShoppingBag, badge: '486' }
-      ]
-    },
-    {
-      label: null,
-      items: [
-        { name: 'Activity', path: '/admin/activity', icon: Activity },
-        { name: 'Profile', path: '/admin/profile', icon: UserCheck }
+        { name: 'Incident Activity', path: '/admin/activity', icon: Activity },
+        { name: 'Officer Profile', path: '/admin/profile', icon: UserCheck }
       ]
     }
   ];
@@ -190,3 +183,4 @@ const AdminSidebar = ({ isOpen, onClose }) => {
 };
 
 export default AdminSidebar;
+

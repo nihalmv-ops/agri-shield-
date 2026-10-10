@@ -50,3 +50,4 @@ const DataTable = ({ columns = [], data = [], keyField = 'id', emptyMessage = 'N
 };
 
 export default DataTable;
+

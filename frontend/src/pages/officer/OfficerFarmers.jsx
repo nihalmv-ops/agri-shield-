@@ -3,14 +3,15 @@ import {
   Trees, 
   Search, 
   MapPin, 
-  Package, 
   Calendar, 
   Eye, 
-  ShoppingBag, 
   X, 
   Phone, 
   Mail, 
-  ShieldCheck 
+  ShieldCheck, 
+  Radio, 
+  AlertTriangle, 
+  Send 
 } from 'lucide-react';
 import StatusBadge from '../../components/officer/StatusBadge';
 import Button from '../../components/Button';
@@ -20,7 +21,8 @@ const OfficerFarmers = () => {
   const [farmers, setFarmers] = useState(registeredFarmers);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFarmerProfile, setSelectedFarmerProfile] = useState(null);
-  const [selectedFarmerProducts, setSelectedFarmerProducts] = useState(null);
+  const [selectedFarmerAlert, setSelectedFarmerAlert] = useState(null);
+  const [alertSuccess, setAlertSuccess] = useState(false);
 
   const filteredFarmers = useMemo(() => {
     return farmers.filter((f) => {
@@ -87,7 +89,7 @@ const OfficerFarmers = () => {
               <tr>
                 <th className="py-4 px-6">Farmer Name</th>
                 <th className="py-4 px-6">Location</th>
-                <th className="py-4 px-6">Products Listed</th>
+                <th className="py-4 px-6">Land Acreage</th>
                 <th className="py-4 px-6">Joined Date</th>
                 <th className="py-4 px-6">Status</th>
                 <th className="py-4 px-6 text-right">Actions</th>
@@ -120,8 +122,8 @@ const OfficerFarmers = () => {
                   </td>
                   <td className="py-4 px-6">
                     <span className="inline-flex items-center gap-1 font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                      <Package className="w-3 h-3" />
-                      {farmer.productsCount} Products
+                      <Trees className="w-3 h-3" />
+                      {farmer.acres}
                     </span>
                   </td>
                   <td className="py-4 px-6 text-gray-600">{farmer.joinedDate}</td>
@@ -137,10 +139,11 @@ const OfficerFarmers = () => {
                         View Profile
                       </button>
                       <button
-                        onClick={() => setSelectedFarmerProducts(farmer)}
-                        className="px-3 py-1.5 rounded-full text-xs font-bold bg-[#063B2A] hover:bg-[#084833] text-white transition-colors"
+                        onClick={() => { setSelectedFarmerAlert(farmer); setAlertSuccess(false); }}
+                        className="px-3 py-1.5 rounded-full text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white transition-colors flex items-center gap-1"
                       >
-                        View Products
+                        <AlertTriangle className="w-3.5 h-3.5" />
+                        <span>Send Alert</span>
                       </button>
                     </div>
                   </td>
@@ -171,7 +174,7 @@ const OfficerFarmers = () => {
 
               <div className="flex items-center justify-between text-xs text-gray-600">
                 <span>{farmer.location}</span>
-                <strong className="text-emerald-800">{farmer.productsCount} Products Listed</strong>
+                <strong className="text-emerald-800">{farmer.acres} Monitored</strong>
               </div>
 
               <div className="grid grid-cols-2 gap-2 pt-1">
@@ -182,10 +185,11 @@ const OfficerFarmers = () => {
                   View Profile
                 </button>
                 <button
-                  onClick={() => setSelectedFarmerProducts(farmer)}
-                  className="py-2 bg-[#063B2A] text-white font-bold text-xs rounded-xl"
+                  onClick={() => { setSelectedFarmerAlert(farmer); setAlertSuccess(false); }}
+                  className="py-2 bg-rose-600 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1"
                 >
-                  View Products
+                  <AlertTriangle className="w-3.5 h-3.5" />
+                  <span>Send Alert</span>
                 </button>
               </div>
             </div>
@@ -259,47 +263,85 @@ const OfficerFarmers = () => {
         </div>
       )}
 
-      {/* View Products Modal */}
-      {selectedFarmerProducts && (
+      {/* Emergency Siren SMS Dispatch Modal */}
+      {selectedFarmerAlert && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-fadeIn">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-emerald-900/10 space-y-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-rose-200 space-y-4">
             <div className="flex items-start justify-between pb-3 border-b border-gray-100">
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded">
-                  Farm Catalog
-                </span>
-                <h3 className="text-lg font-black text-gray-900 mt-1">
-                  Products by {selectedFarmerProducts.name}
-                </h3>
-                <p className="text-xs text-gray-500">{selectedFarmerProducts.location}</p>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center">
+                  <AlertTriangle className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-rose-950">
+                    Emergency Threat Warning
+                  </h3>
+                  <p className="text-xs text-gray-500">Target: {selectedFarmerAlert.name}</p>
+                </div>
               </div>
               <button
-                onClick={() => setSelectedFarmerProducts(null)}
+                onClick={() => setSelectedFarmerAlert(null)}
                 className="text-gray-400 hover:text-gray-600 p-1 rounded-full"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="p-4 bg-emerald-50/70 border border-emerald-200 rounded-2xl text-xs space-y-2">
-              <p className="font-extrabold text-[#063B2A]">
-                Listed Harvests ({selectedFarmerProducts.productsCount} Items):
-              </p>
-              <p className="text-emerald-900 leading-relaxed">
-                {selectedFarmerProducts.mainCrops}
-              </p>
-            </div>
+            {alertSuccess ? (
+              <div className="py-6 text-center space-y-2">
+                <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
+                  <ShieldCheck className="w-6 h-6" />
+                </div>
+                <h4 className="font-black text-emerald-950 text-sm">
+                  Priority Siren SMS Dispatched!
+                </h4>
+                <p className="text-xs text-gray-500">
+                  Alert sent to {selectedFarmerAlert.phone} ({selectedFarmerAlert.location}).
+                </p>
+                <button
+                  onClick={() => setSelectedFarmerAlert(null)}
+                  className="mt-3 px-4 py-2 bg-[#063B2A] text-white text-xs font-bold rounded-xl"
+                >
+                  Close
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4 text-xs">
+                <div className="p-3 bg-amber-50 border border-amber-200 rounded-2xl text-amber-900 space-y-1">
+                  <p className="font-bold">Boundary Perimeter Alert Directive:</p>
+                  <p>
+                    Transmits instant loud siren audio notification and SMS advisory to {selectedFarmerAlert.name}'s verified mobile number.
+                  </p>
+                </div>
 
-            <div className="pt-2 flex justify-end">
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => setSelectedFarmerProducts(null)}
-                className="bg-[#10B981] text-white"
-              >
-                Done
-              </Button>
-            </div>
+                <div className="space-y-2 bg-[#F5F8F6] p-3 rounded-2xl">
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Target Mobile:</span>
+                    <strong className="font-mono text-gray-900">{selectedFarmerAlert.phone}</strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Monitored Holding:</span>
+                    <strong className="text-gray-900">{selectedFarmerAlert.acres} ({selectedFarmerAlert.location})</strong>
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2 pt-2">
+                  <button
+                    onClick={() => setSelectedFarmerAlert(null)}
+                    className="px-4 py-2 text-xs font-bold text-gray-600 hover:bg-gray-100 rounded-xl"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => setAlertSuccess(true)}
+                    className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-black rounded-xl shadow-md flex items-center gap-1.5"
+                  >
+                    <Send className="w-3.5 h-3.5" />
+                    <span>Authorize Warning</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

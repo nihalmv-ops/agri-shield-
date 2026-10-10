@@ -5,7 +5,6 @@ import {
   MessageSquareWarning, 
   CheckCircle2, 
   Trees, 
-  ShoppingBag, 
   Cpu, 
   AlertTriangle, 
   Download, 
@@ -123,18 +122,18 @@ const Dashboard = () => {
           color="teal"
         />
         <StatCard
-          title="Enrolled Farmers"
+          title="Protected Farmers"
           value="248"
           subtext="+14 this month"
           icon="Trees"
           color="emerald"
         />
         <StatCard
-          title="Market Products"
-          value="486"
-          subtext="8 under review"
-          icon="ShoppingBag"
-          color="blue"
+          title="High-Risk Sectors"
+          value="6 Zones"
+          subtext="Perimeter active"
+          icon="ShieldAlert"
+          color="rose"
         />
         <StatCard
           title="AI Edge Cameras"
@@ -547,3 +546,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+

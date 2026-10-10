@@ -1,4 +1,5 @@
 // AgriShield Admin - Activity Timeline Dataset
+// Dedicated to wildlife alerts, sensor telemetry, and farmer grievance management
 
 export const initialActivity = [
   {
@@ -13,7 +14,7 @@ export const initialActivity = [
   {
     id: "ACT-102",
     time: "09:48 PM",
-    title: "New complaint submitted by Rahul Kumar",
+    title: "New crop damage complaint by Rahul Kumar",
     description: "Ticket CMP-001 filed for paddy crop destruction along buffer perimeter.",
     type: "complaint",
     icon: "MessageSquareWarning",
@@ -22,7 +23,7 @@ export const initialActivity = [
   {
     id: "ACT-103",
     time: "08:15 PM",
-    title: "Leopard alert verified",
+    title: "Leopard alert verified by Forest Officer",
     description: "DFO Anjali Nair confirmed feline thermal sighting on CAM-014 at Vandiperiyar.",
     type: "verified",
     icon: "CheckCircle2",
@@ -31,8 +32,8 @@ export const initialActivity = [
   {
     id: "ACT-104",
     time: "07:40 PM",
-    title: "New farmer registered",
-    description: "Anjali S enlisted Highrange Apiaries (3.2 Acres) into agricultural directory.",
+    title: "Farmer registered for early warning siren",
+    description: "Anjali S enlisted Highrange Apiaries (3.2 Acres) into defense perimeter.",
     type: "farmer",
     icon: "Trees",
     color: "emerald"
@@ -40,11 +41,11 @@ export const initialActivity = [
   {
     id: "ACT-105",
     time: "06:30 PM",
-    title: "New marketplace product added",
-    description: "Fresh Tomato (200 kg) listed by farmer Rahul Kumar at ₹60/kg.",
-    type: "product",
-    icon: "ShoppingBag",
-    color: "emerald"
+    title: "Wild boar herd repelled by acoustic sounder",
+    description: "Automated siren sounder S-02 triggered in Peechi buffer fringe after thermal trip.",
+    type: "alert",
+    icon: "ShieldAlert",
+    color: "rose"
   },
   {
     id: "ACT-106",
