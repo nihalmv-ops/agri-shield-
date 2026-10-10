@@ -54,3 +54,4 @@ const FavouriteButton = ({ productId, size = 'md', className = '' }) => {
 };
 
 export default FavouriteButton;
+

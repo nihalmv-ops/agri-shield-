@@ -149,3 +149,4 @@ const SellerCard = ({
 };
 
 export default SellerCard;
+

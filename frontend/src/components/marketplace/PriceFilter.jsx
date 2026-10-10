@@ -85,3 +85,4 @@ const PriceFilter = ({
 };
 
 export default PriceFilter;
+

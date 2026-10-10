@@ -253,3 +253,4 @@ const SellerProfile = () => {
 };
 
 export default SellerProfile;
+

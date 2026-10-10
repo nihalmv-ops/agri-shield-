@@ -380,3 +380,4 @@ export const initialMarketplaceProducts = [
 ];
 
 export default initialMarketplaceProducts;
+
