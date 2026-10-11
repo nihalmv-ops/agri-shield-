@@ -73,7 +73,7 @@ const Complaints = () => {
   };
 
   const handleQuickAdvance = (id, newStatus) => {
-    setComplaints(prev => prev.map(c => c.id === id ? { ...c, status: newStatus } : a));
+    setComplaints(prev => prev.map(c => c.id === id ? { ...c, status: newStatus } : c));
     showToast(`Ticket #${id} moved to "${newStatus}"`);
   };
 
