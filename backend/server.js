@@ -100,3 +100,4 @@ app.listen(PORT, () => {
   console.log(`[AgriShield] Server running in ${process.env.NODE_ENV || 'development'} mode on http://localhost:${PORT}`);
   console.log(`[AgriShield] Health check available at http://localhost:${PORT}/api/health`);
 });
+

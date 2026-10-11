@@ -55,3 +55,4 @@ const clearDatabase = async () => {
 };
 
 clearDatabase();
+

@@ -65,3 +65,4 @@ const cameraTrapSchema = new mongoose.Schema(
 
 const CameraTrap = mongoose.model('CameraTrap', cameraTrapSchema);
 export default CameraTrap;
+

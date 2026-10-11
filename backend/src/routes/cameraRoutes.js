@@ -17,3 +17,4 @@ router.route('/:id')
 router.post('/:id/simulate', protect, officerOnly, simulateCameraDetection);
 
 export default router;
+

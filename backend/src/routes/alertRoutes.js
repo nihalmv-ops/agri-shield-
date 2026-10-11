@@ -8,6 +8,7 @@ import {
   dispatchSquad,
   triggerSiren,
   broadcastAlert,
+  createAndBroadcastAlert,
   getAlertTrends
 } from '../controllers/alertController.js';
 import { protect, officerOnly } from '../middleware/auth.js';
@@ -25,6 +26,7 @@ router.route('/:id')
   .get(getAlertById);
 
 // Officer tactical action endpoints
+router.post('/broadcast-new', protect, officerOnly, createAndBroadcastAlert);
 router.patch('/:id/verify', protect, officerOnly, verifyAlert);
 router.patch('/:id/dismiss', protect, officerOnly, dismissAlert);
 router.post('/:id/dispatch', protect, officerOnly, dispatchSquad);
@@ -32,3 +34,4 @@ router.post('/:id/siren', protect, officerOnly, triggerSiren);
 router.post('/:id/broadcast', protect, officerOnly, broadcastAlert);
 
 export default router;
+

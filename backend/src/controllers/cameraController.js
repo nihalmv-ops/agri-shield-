@@ -139,3 +139,4 @@ export const simulateCameraDetection = async (req, res) => {
     });
   }
 };
+

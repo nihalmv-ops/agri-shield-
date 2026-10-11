@@ -7,3 +7,4 @@ export const generateToken = (id, role = 'user') => {
     { expiresIn: process.env.JWT_EXPIRE || '30d' }
   );
 };
+

@@ -295,3 +295,4 @@ export const seedActivities = [
     color: 'emerald'
   }
 ];
+

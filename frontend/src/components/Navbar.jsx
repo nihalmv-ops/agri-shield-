@@ -21,12 +21,14 @@ import {
 } from 'lucide-react';
 import Button from './Button';
 import { getFavorites } from '../utils/marketplaceStorage';
+import { getBroadcastAlerts } from '../utils/broadcastStorage';
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [favoritesCount, setFavoritesCount] = useState(0);
+  const [activeBroadcast, setActiveBroadcast] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,10 +37,26 @@ const Navbar = () => {
       setFavoritesCount(favs.length);
     };
 
+    const checkBroadcasts = () => {
+      const broadcasts = getBroadcastAlerts();
+      if (broadcasts && broadcasts.length > 0) {
+        setActiveBroadcast(broadcasts[0]);
+      } else {
+        setActiveBroadcast(null);
+      }
+    };
+
     updateFavCount();
+    checkBroadcasts();
+
     window.addEventListener('agrishield_favorites_updated', updateFavCount);
+    window.addEventListener('storage', checkBroadcasts);
+    window.addEventListener('agrishield_broadcast_sent', checkBroadcasts);
+
     return () => {
       window.removeEventListener('agrishield_favorites_updated', updateFavCount);
+      window.removeEventListener('storage', checkBroadcasts);
+      window.removeEventListener('agrishield_broadcast_sent', checkBroadcasts);
     };
   }, []);
 
@@ -60,6 +78,29 @@ const Navbar = () => {
 
   return (
     <header className="sticky top-0 z-50 bg-[#063B2A] text-white border-b border-emerald-900/40 backdrop-blur-md bg-opacity-95 shadow-md">
+      {/* 🚨 Emergency Forest Department Broadcast Ticker */}
+      {activeBroadcast && (
+        <div className="bg-gradient-to-r from-rose-700 via-red-600 to-rose-700 text-white text-xs py-2 px-4 border-b border-rose-500 shadow-md">
+          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-white animate-ping"></span>
+              <span className="font-black uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded text-[10px]">
+                Official Alert
+              </span>
+              <span className="font-extrabold">
+                🚨 {activeBroadcast.animal} Warning: {activeBroadcast.zone || activeBroadcast.location}
+              </span>
+            </div>
+            <Link
+              to="/wildlife-alerts"
+              className="text-[11px] underline font-black hover:text-rose-100 flex items-center gap-1 self-end sm:self-auto"
+            >
+              View Safety Protocol &amp; Acoustic Siren →
+            </Link>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20 gap-4">
           
@@ -168,6 +209,15 @@ const Navbar = () => {
                     <span className="text-[11px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full font-medium">3 New</span>
                   </div>
                   <div className="divide-y divide-gray-100 text-xs">
+                    {activeBroadcast && (
+                      <div className="py-2.5 bg-rose-50/70 p-2 rounded-xl mb-1 border border-rose-200">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-rose-700 bg-rose-100 px-2 py-0.5 rounded-full inline-block mb-1">
+                          🚨 Emergency Forest Dept Broadcast
+                        </span>
+                        <p className="font-extrabold text-rose-950">{activeBroadcast.animal} Warning: {activeBroadcast.zone}</p>
+                        <p className="text-rose-800 text-[11px] mt-0.5">{activeBroadcast.suggestedAction || 'Stay indoors and secure farm boundary.'}</p>
+                      </div>
+                    )}
                     <div className="py-2.5">
                       <p className="font-semibold text-gray-900">🐘 Elephant detected in Wayanad</p>
                       <p className="text-gray-500 text-[11px]">CAM-023 • 96% AI confidence</p>

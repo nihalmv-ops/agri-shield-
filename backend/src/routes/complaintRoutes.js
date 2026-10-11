@@ -24,3 +24,4 @@ router.route('/:id')
 router.patch('/:id/status', officerOnly, updateComplaintStatus);
 
 export default router;
+

@@ -58,3 +58,4 @@ export const createActivity = async (req, res) => {
     });
   }
 };
+

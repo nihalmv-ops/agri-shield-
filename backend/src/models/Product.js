@@ -136,3 +136,4 @@ productSchema.index({ name: 'text', description: 'text', location: 'text', distr
 
 const Product = mongoose.model('Product', productSchema);
 export default Product;
+

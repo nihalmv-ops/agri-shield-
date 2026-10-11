@@ -367,6 +367,75 @@ export const broadcastAlert = async (req, res) => {
   }
 };
 
+// @desc    Create and send a new emergency broadcast alert directly to farmers/citizens
+// @route   POST /api/alerts/broadcast-new
+// @access  Private (Officer only)
+export const createAndBroadcastAlert = async (req, res) => {
+  try {
+    const {
+      animal = 'Elephant',
+      severity = 'Critical',
+      location = 'Wayanad, Kerala',
+      zone = 'Sector 4 (Muthanga Sanctuary Border)',
+      description,
+      suggestedAction
+    } = req.body;
+
+    const count = await WildlifeAlert.countDocuments();
+    const alertId = `AL-BRD-${String(count + 1).padStart(3, '0')}`;
+
+    const defaultImage = animal.toLowerCase().includes('leopard')
+      ? 'https://images.unsplash.com/photo-1456926631375-92c8ce872def?auto=format&fit=crop&w=1200&q=80'
+      : animal.toLowerCase().includes('boar')
+      ? 'https://images.unsplash.com/photo-1570481662006-a3a1374699e8?auto=format&fit=crop&w=1200&q=80'
+      : animal.toLowerCase().includes('tiger')
+      ? 'https://images.unsplash.com/photo-1561731216-c3a4d99437d5?auto=format&fit=crop&w=1200&q=80'
+      : 'https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?auto=format&fit=crop&w=1200&q=80';
+
+    const alert = await WildlifeAlert.create({
+      alertId,
+      animal,
+      confidence: 99,
+      location,
+      zone,
+      severity,
+      source: 'Forest Officer Broadcast',
+      camera: 'OFFICER-DISPATCH',
+      status: 'Verified',
+      image: defaultImage,
+      description: description || `Official emergency warning: ${animal} movement detected in ${zone}. Exercise extreme vigilance and avoid forest border trails.`,
+      suggestedAction: suggestedAction || 'Keep children indoors, illuminate boundary fencing, secure cattle, prepare acoustic sounders.',
+      officerNotes: `Broadcast dispatched by Officer ${req.user.name} (${req.user.officerDetails?.rank || 'Range Officer'}) on ${new Date().toLocaleTimeString()}.`,
+      broadcastSent: true
+    });
+
+    // Log Activity
+    try {
+      await ActivityLog.create({
+        activityId: `ACT-${Date.now().toString().slice(-4)}`,
+        title: `Emergency Broadcast sent: ${animal} Warning`,
+        description: `Officer ${req.user.name} broadcasted urgent early warning alert to all citizens in ${zone}.`,
+        type: 'alert',
+        icon: 'Radio',
+        color: 'rose'
+      });
+    } catch (e) {
+      console.warn('Activity log write error:', e.message);
+    }
+
+    res.status(201).json({
+      success: true,
+      message: `Emergency Alert #${alertId} broadcasted to all farmers in ${zone}!`,
+      alert
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Error creating broadcast alert'
+    });
+  }
+};
+
 // @desc    Get aggregated Monthly Wildlife Detection Trends
 // @route   GET /api/alerts/trends
 // @access  Public

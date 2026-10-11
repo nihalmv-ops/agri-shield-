@@ -43,3 +43,4 @@ export const updateMyComplaint = (id, updates) => {
     return [];
   }
 };
+

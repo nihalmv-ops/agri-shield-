@@ -12,3 +12,4 @@ router.route('/')
   .post(protect, officerOnly, createActivity);
 
 export default router;
+

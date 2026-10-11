@@ -105,3 +105,4 @@ const wildlifeAlertSchema = new mongoose.Schema(
 
 const WildlifeAlert = mongoose.model('WildlifeAlert', wildlifeAlertSchema);
 export default WildlifeAlert;
+

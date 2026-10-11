@@ -36,3 +36,4 @@ router.post('/:id/favourite', protect, toggleFavourite);
 router.post('/:id/report', protect, reportProduct);
 
 export default router;
+

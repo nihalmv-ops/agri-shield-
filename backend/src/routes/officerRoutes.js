@@ -29,3 +29,4 @@ router.patch('/users/:id/status', toggleUserStatus);
 router.get('/sitrep', generateSitRep);
 
 export default router;
+

@@ -27,3 +27,4 @@ router.post('/', protect, upload.single('image'), (req, res) => {
 });
 
 export default router;
+

@@ -267,3 +267,4 @@ export const generateSitRep = async (req, res) => {
     });
   }
 };
+

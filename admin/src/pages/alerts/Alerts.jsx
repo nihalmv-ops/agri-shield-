@@ -29,6 +29,8 @@ import {
 import StatusBadge from '../../components/StatusBadge';
 import EmptyState from '../../components/EmptyState';
 import { initialWildlifeAlerts } from '../../data/wildlifeAlerts';
+import { saveBroadcastAlert } from '../../utils/broadcastStorage';
+import { adminApi } from '../../utils/api';
 
 const Alerts = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -42,6 +44,22 @@ const Alerts = () => {
   const [sortBy, setSortBy] = useState('newest');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'table' | 'sensors'
   
+  // Emergency Broadcast Modal
+  const [showBroadcastModal, setShowBroadcastModal] = useState(false);
+  const [isBroadcasting, setIsBroadcasting] = useState(false);
+  const [broadcastForm, setBroadcastForm] = useState({
+    animal: 'Asian Elephant',
+    severity: 'Critical',
+    location: 'Wayanad, Kerala',
+    zone: 'Sector 4 (Muthanga Sanctuary Border)',
+    title: '',
+    description: '',
+    suggestedAction: '',
+    notifyWeb: true,
+    notifySms: true,
+    notifySiren: true
+  });
+
   // Quick Inspect Modal
   const [inspectAlert, setInspectAlert] = useState(null);
   const [inspectVision, setInspectVision] = useState('color'); // 'color' | 'nightvision' | 'thermal'
@@ -76,6 +94,76 @@ const Alerts = () => {
     setAlerts(prev => prev.map(a => selectedIds.includes(a.id) ? { ...a, status: 'Verified' } : a));
     showToast(`Verified ${selectedIds.length} selected alerts in bulk.`);
     setSelectedIds([]);
+  };
+
+  const handleSendBroadcast = async (e) => {
+    e.preventDefault();
+    setIsBroadcasting(true);
+
+    const ticketId = `AL-BRD-${Math.floor(100 + Math.random() * 900)}`;
+    const newAlert = {
+      id: ticketId,
+      alertId: ticketId,
+      animal: broadcastForm.animal,
+      confidence: 99,
+      location: broadcastForm.location,
+      coordinates: '11.6854° N, 76.1320° E',
+      date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+      time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }),
+      source: 'Forest Officer Broadcast',
+      camera: 'OFFICER-DISPATCH',
+      status: 'Verified',
+      severity: broadcastForm.severity,
+      zone: broadcastForm.zone,
+      title: broadcastForm.title || `Emergency Warning: ${broadcastForm.animal} in ${broadcastForm.zone}`,
+      description: broadcastForm.description || `Official emergency alert: ${broadcastForm.animal} movement detected in ${broadcastForm.zone}. Immediate vigilance required.`,
+      suggestedAction: broadcastForm.suggestedAction || 'Stay indoors. Secure livestock. Keep boundary solar fencing energized. Avoid night forest trails.',
+      image: broadcastForm.animal.toLowerCase().includes('leopard')
+        ? 'https://images.unsplash.com/photo-1456926631375-92c8ce872def?auto=format&fit=crop&w=1200&q=80'
+        : broadcastForm.animal.toLowerCase().includes('boar')
+        ? 'https://images.unsplash.com/photo-1570481662006-a3a1374699e8?auto=format&fit=crop&w=1200&q=80'
+        : 'https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?auto=format&fit=crop&w=1200&q=80',
+      officerNotes: `Broadcast dispatched by Forest Officer to all citizens on ${new Date().toLocaleTimeString()}`,
+      broadcastSent: true,
+      isBroadcast: true
+    };
+
+    // Try sending to backend API
+    try {
+      await adminApi.post('/alerts/broadcast-new', {
+        animal: newAlert.animal,
+        severity: newAlert.severity,
+        location: newAlert.location,
+        zone: newAlert.zone,
+        description: newAlert.description,
+        suggestedAction: newAlert.suggestedAction
+      });
+    } catch (err) {
+      console.warn('Backend broadcast API:', err.message);
+    }
+
+    // Save to shared broadcast storage
+    saveBroadcastAlert(newAlert);
+
+    // Update local state and notify user
+    setAlerts(prev => [newAlert, ...prev]);
+    showToast(`🚨 Emergency Alert transmitted to all farmers in ${broadcastForm.zone}!`);
+    setShowBroadcastModal(false);
+    setIsBroadcasting(false);
+
+    // Reset form
+    setBroadcastForm({
+      animal: 'Asian Elephant',
+      severity: 'Critical',
+      location: 'Wayanad, Kerala',
+      zone: 'Sector 4 (Muthanga Sanctuary Border)',
+      title: '',
+      description: '',
+      suggestedAction: '',
+      notifyWeb: true,
+      notifySms: true,
+      notifySiren: true
+    });
   };
 
   // Filtered & Sorted Alerts
@@ -159,8 +247,17 @@ const Alerts = () => {
           </p>
         </div>
 
-        {/* View Switchers */}
-        <div className="flex items-center gap-2 self-start md:self-auto">
+        {/* Action Controls & View Switchers */}
+        <div className="flex flex-wrap items-center gap-3 self-start md:self-auto">
+          {/* Send Broadcast Alert Button */}
+          <button
+            onClick={() => setShowBroadcastModal(true)}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-rose-600 to-red-700 hover:from-rose-700 hover:to-red-800 text-white font-black text-xs shadow-lg shadow-rose-600/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
+          >
+            <Send className="w-3.5 h-3.5" />
+            <span>Broadcast Alert to Farmers</span>
+          </button>
+
           <div className="bg-white p-1 rounded-2xl border border-gray-200 flex items-center shadow-xs text-xs font-bold">
             <button
               onClick={() => setViewMode('grid')}
@@ -656,6 +753,195 @@ const Alerts = () => {
                 Open Full Dossier
               </Link>
             </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* Broadcast Alert to Farmers Modal */}
+      {showBroadcastModal && (
+        <div className="fixed inset-0 z-50 bg-[#071A14]/80 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 border border-emerald-950/20 shadow-2xl space-y-5 animate-scaleUp max-h-[90vh] overflow-y-auto">
+            
+            {/* Modal Header */}
+            <div className="flex items-start justify-between pb-4 border-b border-gray-100">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-rose-600 animate-ping"></span>
+                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-rose-700 bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-200">
+                    Emergency Dispatch
+                  </span>
+                </div>
+                <h3 className="text-xl font-black text-[#063B2A]">
+                  Broadcast Wildlife Warning to Farmers
+                </h3>
+                <p className="text-xs text-gray-500">
+                  Transmits high-priority alerts to citizens' portal, SMS network, and sirens.
+                </p>
+              </div>
+
+              <button
+                onClick={() => setShowBroadcastModal(false)}
+                className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSendBroadcast} className="space-y-4 text-xs">
+              
+              {/* Species & Severity Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-gray-700 mb-1">
+                    Animal Species *
+                  </label>
+                  <select
+                    value={broadcastForm.animal}
+                    onChange={(e) => setBroadcastForm({ ...broadcastForm, animal: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-gray-50 font-semibold focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  >
+                    <option value="Asian Elephant">🐘 Asian Elephant</option>
+                    <option value="Indian Leopard">🐆 Indian Leopard</option>
+                    <option value="Wild Boar">🐗 Wild Boar</option>
+                    <option value="Bengal Tiger">🐅 Bengal Tiger</option>
+                    <option value="Sloth Bear">🐻 Sloth Bear</option>
+                    <option value="Indian Gaur (Bison)">🦬 Indian Gaur (Bison)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-gray-700 mb-1">
+                    Threat Severity *
+                  </label>
+                  <select
+                    value={broadcastForm.severity}
+                    onChange={(e) => setBroadcastForm({ ...broadcastForm, severity: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-gray-50 font-semibold focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  >
+                    <option value="Critical">🔴 Critical (Immediate Evacuation / Lockdown)</option>
+                    <option value="High">🟠 High (Extreme Vigilance Required)</option>
+                    <option value="Moderate">🔵 Moderate (Cautionary Advisory)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Target Zone */}
+              <div>
+                <label className="block font-bold text-gray-700 mb-1">
+                  Target Buffer Sector &amp; Village *
+                </label>
+                <select
+                  value={broadcastForm.zone}
+                  onChange={(e) => setBroadcastForm({ ...broadcastForm, zone: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-gray-50 font-semibold focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                >
+                  <option value="Sector 4 (Muthanga Sanctuary Border, Wayanad)">Sector 4 (Muthanga Sanctuary Border, Wayanad)</option>
+                  <option value="Sector 7 (Vandiperiyar Tea Cluster, Idukki)">Sector 7 (Vandiperiyar Tea Cluster, Idukki)</option>
+                  <option value="Sector 2 (Kothamangalam Foothills, Ernakulam)">Sector 2 (Kothamangalam Foothills, Ernakulam)</option>
+                  <option value="Sector 5 (Chalakudy Riverine Corridor, Thrissur)">Sector 5 (Chalakudy Riverine Corridor, Thrissur)</option>
+                  <option value="All Kerala Buffer Zone Farmers">All Kerala Buffer Zone Farmers (State-wide)</option>
+                </select>
+              </div>
+
+              {/* Headline */}
+              <div>
+                <label className="block font-bold text-gray-700 mb-1">
+                  Warning Headline
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Urgent: Elephant herd spotted within 250m of farm border"
+                  value={broadcastForm.title}
+                  onChange={(e) => setBroadcastForm({ ...broadcastForm, title: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500 font-semibold"
+                />
+              </div>
+
+              {/* Field Description */}
+              <div>
+                <label className="block font-bold text-gray-700 mb-1">
+                  Emergency Details &amp; Observation
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="Describe location of sighting, number of animals, direction of movement..."
+                  value={broadcastForm.description}
+                  onChange={(e) => setBroadcastForm({ ...broadcastForm, description: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                />
+              </div>
+
+              {/* Safety Directive */}
+              <div>
+                <label className="block font-bold text-gray-700 mb-1">
+                  Safety Protocol &amp; Action Required for Citizens *
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="e.g. Stay indoors. Keep livestock penned. Illuminate farm perimeter. Avoid night forest boundary trails."
+                  value={broadcastForm.suggestedAction}
+                  onChange={(e) => setBroadcastForm({ ...broadcastForm, suggestedAction: e.target.value })}
+                  required
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500 font-medium"
+                />
+              </div>
+
+              {/* Channels */}
+              <div className="p-3.5 bg-gray-50 rounded-2xl border border-gray-200/80 space-y-2">
+                <span className="text-[11px] font-extrabold text-gray-700 block">Dispatch Channels:</span>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <label className="flex items-center gap-2 cursor-pointer font-semibold text-gray-800">
+                    <input
+                      type="checkbox"
+                      checked={broadcastForm.notifyWeb}
+                      onChange={(e) => setBroadcastForm({ ...broadcastForm, notifyWeb: e.target.checked })}
+                      className="rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4"
+                    />
+                    <span>Farmer Portal Push</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer font-semibold text-gray-800">
+                    <input
+                      type="checkbox"
+                      checked={broadcastForm.notifySms}
+                      onChange={(e) => setBroadcastForm({ ...broadcastForm, notifySms: e.target.checked })}
+                      className="rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4"
+                    />
+                    <span>SMS / WhatsApp Blast</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer font-semibold text-gray-800">
+                    <input
+                      type="checkbox"
+                      checked={broadcastForm.notifySiren}
+                      onChange={(e) => setBroadcastForm({ ...broadcastForm, notifySiren: e.target.checked })}
+                      className="rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4"
+                    />
+                    <span>Acoustic Solar Siren</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-2 flex items-center justify-end gap-3 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => setShowBroadcastModal(false)}
+                  className="px-4 py-2.5 rounded-xl text-gray-600 hover:bg-gray-100 font-bold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isBroadcasting}
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-red-700 hover:from-rose-700 hover:to-red-800 text-white font-black shadow-lg shadow-rose-600/30 transition-all disabled:opacity-50"
+                >
+                  <Send className="w-4 h-4" />
+                  <span>{isBroadcasting ? 'Transmitting Alert...' : 'Broadcast Emergency Warning Now'}</span>
+                </button>
+              </div>
+
+            </form>
 
           </div>
         </div>
