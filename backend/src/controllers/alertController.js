@@ -372,24 +372,39 @@ export const broadcastAlert = async (req, res) => {
 // @access  Public
 export const getAlertTrends = async (req, res) => {
   try {
-    const trends = [
-      { month: 'Jan', elephant: 14, leopard: 6, boar: 22, total: 42, note: 'Dry season baseline; normal fringe waterhole visits' },
-      { month: 'Feb', elephant: 18, leopard: 8, boar: 26, total: 52, note: 'Early seasonal migration toward Kabini & Periyar basins' },
-      { month: 'Mar', elephant: 22, leopard: 9, boar: 31, total: 62, note: 'Waterhole clustering; heightened edge vigilance' },
-      { month: 'Apr', elephant: 29, leopard: 11, boar: 38, total: 78, note: 'Pre-monsoon crop boundary scouting by lone tuskers' },
-      { month: 'May', elephant: 35, leopard: 14, boar: 44, total: 93, note: 'Jackfruit & mango fruiting season in village groves' },
-      { month: 'Jun', elephant: 42, leopard: 18, boar: 48, total: 108, note: 'Monsoon onset; elephants active along bamboo corridors' },
-      { month: 'Jul', elephant: 38, leopard: 16, boar: 41, total: 95, note: 'High sanctuary interior rainfall; temporary perimeter lull' },
-      { month: 'Aug', elephant: 45, leopard: 19, boar: 52, total: 116, note: 'Flooded interior streams driving wildlife to ridge edges' },
-      { month: 'Sep', elephant: 51, leopard: 22, boar: 58, total: 131, note: 'Maturing paddy crop scent attracting family herds' },
-      { month: 'Oct', elephant: 63, leopard: 27, boar: 64, total: 154, note: 'Harvest season peak incursion; DEFCON 2 elevated' },
-      { month: 'Nov', elephant: 56, leopard: 24, boar: 59, total: 139, note: 'Post-harvest gleaning; RRT night patrol scheduled' },
-      { month: 'Dec', elephant: 48, leopard: 20, boar: 50, total: 118, note: 'Winter transition period; return to deep core reserve' }
-    ];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    // Query actual detection alerts from database
+    const alerts = await WildlifeAlert.find().select('createdAt animal date');
+    
+    const trends = months.map(m => ({
+      month: m,
+      elephant: 0,
+      leopard: 0,
+      boar: 0,
+      total: 0,
+      note: 'Field optical camera telemetry'
+    }));
+
+    alerts.forEach(a => {
+      const d = a.createdAt ? new Date(a.createdAt) : new Date();
+      const monthIdx = d.getMonth();
+      if (monthIdx >= 0 && monthIdx < 12) {
+        trends[monthIdx].total += 1;
+        const animalLower = (a.animal || '').toLowerCase();
+        if (animalLower.includes('elephant')) {
+          trends[monthIdx].elephant += 1;
+        } else if (animalLower.includes('leopard')) {
+          trends[monthIdx].leopard += 1;
+        } else if (animalLower.includes('boar')) {
+          trends[monthIdx].boar += 1;
+        }
+      }
+    });
 
     res.status(200).json({
       success: true,
-      year: 2026,
+      year: new Date().getFullYear(),
       trends
     });
   } catch (error) {
@@ -399,3 +414,4 @@ export const getAlertTrends = async (req, res) => {
     });
   }
 };
+
