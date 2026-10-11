@@ -34,6 +34,7 @@ import {
 } from 'lucide-react';
 import StatCard from '../components/StatCard';
 import StatusBadge from '../components/StatusBadge';
+import WildlifeTrendsChart from '../components/WildlifeTrendsChart';
 import { initialWildlifeAlerts } from '../data/wildlifeAlerts';
 import { initialComplaints } from '../data/complaints';
 import { initialActivity } from '../data/activity';
@@ -41,7 +42,6 @@ import { initialActivity } from '../data/activity';
 const Dashboard = () => {
   const [alerts, setAlerts] = useState(initialWildlifeAlerts);
   const [complaints, setComplaints] = useState(initialComplaints);
-  const [selectedAnimalFilter, setSelectedAnimalFilter] = useState('All');
   const [exportNotice, setExportNotice] = useState(false);
   const [actionToast, setActionToast] = useState('');
 
@@ -140,22 +140,6 @@ const Dashboard = () => {
     showToast('Generating official Situation Report (SitRep PDF)...');
     setTimeout(() => setExportNotice(false), 2500);
   };
-
-  // Monthly Detection Data for SVG/CSS Chart
-  const monthlyData = [
-    { month: 'Jan', elephant: 14, leopard: 6, boar: 22, total: 42 },
-    { month: 'Feb', elephant: 18, leopard: 8, boar: 26, total: 52 },
-    { month: 'Mar', elephant: 22, leopard: 9, boar: 31, total: 62 },
-    { month: 'Apr', elephant: 29, leopard: 11, boar: 38, total: 78 },
-    { month: 'May', elephant: 35, leopard: 14, boar: 44, total: 93 },
-    { month: 'Jun', elephant: 42, leopard: 18, boar: 48, total: 108 },
-    { month: 'Jul', elephant: 38, leopard: 16, boar: 41, total: 95 },
-    { month: 'Aug', elephant: 45, leopard: 19, boar: 52, total: 116 },
-    { month: 'Sep', elephant: 51, leopard: 22, boar: 58, total: 131 },
-    { month: 'Oct', elephant: 63, leopard: 27, boar: 64, total: 154 }
-  ];
-
-  const maxTotal = Math.max(...monthlyData.map(d => d.total));
 
   return (
     <div className="space-y-8 animate-fadeIn pb-12">
@@ -595,100 +579,8 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
         {/* Left (7 cols): Monthly Wildlife Detections Analytics */}
-        <div className="lg:col-span-7 bg-white rounded-3xl p-6 sm:p-8 border border-emerald-950/10 shadow-soft space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100">
-            <div>
-              <div className="flex items-center gap-2">
-                <Activity className="w-5 h-5 text-[#10B981]" />
-                <h3 className="font-extrabold text-[#063B2A] text-base">
-                  Wildlife Sighting Frequency Trends (2026)
-                </h3>
-              </div>
-              <p className="text-xs text-gray-500 mt-0.5">
-                AI camera trap triggered optical detections across Kerala buffer zones
-              </p>
-            </div>
-
-            {/* Species Filter Chips */}
-            <div className="flex items-center gap-1.5 bg-[#F5F8F6] p-1 rounded-2xl text-xs font-bold">
-              {['All', 'Elephant', 'Leopard', 'Boar'].map((filter) => (
-                <button
-                  key={filter}
-                  onClick={() => setSelectedAnimalFilter(filter)}
-                  className={`px-3 py-1 rounded-xl transition-all ${
-                    selectedAnimalFilter === filter
-                      ? 'bg-[#063B2A] text-white shadow-xs'
-                      : 'text-gray-600 hover:text-[#063B2A]'
-                  }`}
-                >
-                  {filter}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Stacked Chart */}
-          <div className="pt-2">
-            <div className="h-60 sm:h-64 flex items-end justify-between gap-2 sm:gap-3 px-2">
-              {monthlyData.map((d) => {
-                const heightPercent = Math.round((d.total / maxTotal) * 100);
-                const elephantH = Math.round((d.elephant / d.total) * 100);
-                const leopardH = Math.round((d.leopard / d.total) * 100);
-                const boarH = 100 - elephantH - leopardH;
-
-                return (
-                  <div key={d.month} className="flex-1 flex flex-col items-center gap-2 group h-full justify-end">
-                    
-                    {/* Tooltip */}
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-[#071A14] text-white text-[10px] px-2.5 py-1.5 rounded-xl absolute -translate-y-24 pointer-events-none shadow-xl z-20 whitespace-nowrap">
-                      <p className="font-bold">{d.month} 2026: {d.total} total detections</p>
-                      <p className="text-emerald-300">🐘 {d.elephant} • 🐆 {d.leopard} • 🐗 {d.boar}</p>
-                    </div>
-
-                    {/* Stacked Bar */}
-                    <div 
-                      className="w-full max-w-[34px] rounded-t-xl overflow-hidden flex flex-col justify-end bg-emerald-50 transition-all duration-300 group-hover:opacity-90 shadow-xs"
-                      style={{ height: `${heightPercent}%` }}
-                    >
-                      {selectedAnimalFilter === 'All' ? (
-                        <>
-                          <div style={{ height: `${boarH}%` }} className="bg-amber-500 w-full" />
-                          <div style={{ height: `${leopardH}%` }} className="bg-rose-500 w-full" />
-                          <div style={{ height: `${elephantH}%` }} className="bg-[#10B981] w-full" />
-                        </>
-                      ) : selectedAnimalFilter === 'Elephant' ? (
-                        <div className="bg-[#10B981] w-full h-full" />
-                      ) : selectedAnimalFilter === 'Leopard' ? (
-                        <div className="bg-rose-500 w-full h-full" />
-                      ) : (
-                        <div className="bg-amber-500 w-full h-full" />
-                      )}
-                    </div>
-
-                    <span className="text-[11px] font-bold text-gray-500 group-hover:text-[#063B2A]">
-                      {d.month}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Legend */}
-            <div className="flex flex-wrap items-center justify-center gap-6 pt-5 border-t border-gray-100 text-xs font-semibold text-gray-600">
-              <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-[#10B981]"></span>
-                <span>Asian Elephant (41%)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-rose-500"></span>
-                <span>Indian Leopard (18%)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-amber-500"></span>
-                <span>Wild Boar (41%)</span>
-              </div>
-            </div>
-          </div>
+        <div className="lg:col-span-7">
+          <WildlifeTrendsChart />
         </div>
 
         {/* Right (5 cols): Tactical Forest Sectors Grid */}
