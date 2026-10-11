@@ -1,5 +1,6 @@
 {
   "name": "agrishield-backend",
+  "private": true,
   "version": "1.0.0",
   "description": "AgriShield REST API Backend - Forest Officer Command & Farmer Agricultural Marketplace",
   "main": "server.js",
