@@ -901,3 +901,4 @@ const WildlifeTrendsChart = () => {
 };
 
 export default WildlifeTrendsChart;
+

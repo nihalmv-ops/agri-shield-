@@ -1,6 +1,9 @@
 # Dependencies
 node_modules/
 */node_modules/
+**/node_modules/
+uploads/
+**/uploads/
 
 # Production build artifacts
 dist/
