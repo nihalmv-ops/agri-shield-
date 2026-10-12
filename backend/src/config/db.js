@@ -1,4 +1,12 @@
 import mongoose from 'mongoose';
+import dns from 'node:dns';
+
+// Configure public DNS resolvers to ensure MongoDB Atlas SRV records resolve seamlessly on Windows & ISP networks
+try {
+  dns.setServers(['8.8.8.8', '1.1.1.1']);
+} catch (e) {
+  // Retain system default if restricted
+}
 
 export const connectDB = async () => {
   const primaryUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/agrishield';

@@ -1,5 +1,11 @@
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
+import dns from 'node:dns';
+
+try {
+  dns.setServers(['8.8.8.8', '1.1.1.1']);
+} catch (e) {}
+
 import User from './models/User.js';
 import Product from './models/Product.js';
 import Complaint from './models/Complaint.js';
@@ -19,8 +25,15 @@ dotenv.config();
 const seedDatabase = async () => {
   try {
     const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/agrishield';
-    await mongoose.connect(mongoUri);
-    console.log(`[Seed] Connected to MongoDB at ${mongoUri}`);
+    let conn;
+    try {
+      conn = await mongoose.connect(mongoUri);
+    } catch (err) {
+      console.warn(`[Seed] Connection to ${mongoUri} failed: ${err.message}`);
+      console.log('[Seed] Connecting to local MongoDB fallback at mongodb://127.0.0.1:27017/agrishield...');
+      conn = await mongoose.connect('mongodb://127.0.0.1:27017/agrishield');
+    }
+    console.log(`[Seed] Connected to MongoDB: ${conn.connection.host}/${conn.connection.name}`);
 
     // Clear existing collections
     await User.deleteMany({});
