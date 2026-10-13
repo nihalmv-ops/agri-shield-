@@ -321,7 +321,18 @@ const WildlifeAlerts = () => {
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredAlerts.length === 0 ? (
+            <div className="bg-white rounded-3xl p-12 text-center border border-emerald-950/10 shadow-soft space-y-3">
+              <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+              <h3 className="text-base font-black text-[#063B2A]">All Boundaries Clear</h3>
+              <p className="text-xs text-gray-500 max-w-md mx-auto">
+                No active camera trap alerts detected. The forest perimeter is quiet.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredAlerts.map((alert) => (
               <div
                 key={alert.id || alert._id}
@@ -394,6 +405,7 @@ const WildlifeAlerts = () => {
               </div>
             ))}
           </div>
+        )}
         </div>
 
       </div>

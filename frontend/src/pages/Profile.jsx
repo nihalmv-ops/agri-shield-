@@ -22,7 +22,8 @@ import {
   Check
 } from 'lucide-react';
 import Button from '../components/Button';
-import { sampleProducts, sampleComplaints, sampleWildlifeAlerts } from '../data/mockData';
+import { getOwnerProducts } from '../utils/marketplaceStorage';
+import { getMyComplaints } from '../utils/complaintStorage';
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState('products');
@@ -239,7 +240,7 @@ const Profile = () => {
               </div>
 
               <Link
-                to="/marketplace"
+                to="/sell-product"
                 className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#10B981] hover:bg-[#0ea371] text-white text-xs font-bold rounded-full transition-colors shadow-sm"
               >
                 <Plus className="w-4 h-4" />
@@ -247,61 +248,46 @@ const Profile = () => {
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {sampleProducts.slice(0, 3).map((item) => (
-                <div key={item.id} className="bg-white rounded-2xl p-4 border border-emerald-950/10 shadow-soft flex items-center gap-4">
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-20 h-20 rounded-xl object-cover shrink-0"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-bold text-gray-900 text-sm truncate">{item.name}</h4>
-                    <p className="text-xs text-emerald-800 font-extrabold mt-0.5">₹{item.price} / {item.unit}</p>
-                    <p className="text-[11px] text-gray-500 mt-1">Available: {item.quantityAvailable} {item.unit}</p>
-                    <span className="inline-block mt-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
-                      Live on Marketplace
-                    </span>
+            {getOwnerProducts().length === 0 ? (
+              <div className="bg-white rounded-2xl p-10 text-center border border-emerald-950/10 shadow-soft space-y-3">
+                <p className="text-gray-500 text-xs">You have not listed any agricultural products yet.</p>
+                <Link
+                  to="/sell-product"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 hover:underline"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Start listing your fresh produce</span>
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {getOwnerProducts().map((item) => (
+                  <div key={item.id} className="bg-white rounded-2xl p-4 border border-emerald-950/10 shadow-soft flex items-center gap-4">
+                    <img
+                      src={item.images?.[0] || item.image}
+                      alt={item.name}
+                      className="w-20 h-20 rounded-xl object-cover shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-bold text-gray-900 text-sm truncate">{item.name}</h4>
+                      <p className="text-xs text-emerald-800 font-extrabold mt-0.5">₹{item.price} / {item.priceUnit || item.unit}</p>
+                      <p className="text-[11px] text-gray-500 mt-1">Available: {item.quantity} {item.quantityUnit || item.unit}</p>
+                      <span className="inline-block mt-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
+                        Live on Marketplace
+                      </span>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
         {/* Tab 2: My Orders */}
         {activeTab === 'orders' && (
           <div className="space-y-4">
-            <div className="bg-white rounded-2xl p-5 border border-emerald-950/10 shadow-soft flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
-                  <Package className="w-6 h-6" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-gray-900 text-sm">Order #ORD-2026-1049</h4>
-                  <p className="text-xs text-gray-500">Pure Wild Forest Honey (500g x 2) • ₹500</p>
-                  <p className="text-[11px] text-gray-400 mt-0.5">Placed on 04 Oct 2026</p>
-                </div>
-              </div>
-              <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 self-start sm:self-center">
-                Dispatched by Farmer
-              </span>
-            </div>
-
-            <div className="bg-white rounded-2xl p-5 border border-emerald-950/10 shadow-soft flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
-                  <Package className="w-6 h-6" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-gray-900 text-sm">Order #ORD-2026-0988</h4>
-                  <p className="text-xs text-gray-500">Wayanad Black Pepper (1kg) • ₹400</p>
-                  <p className="text-[11px] text-gray-400 mt-0.5">Placed on 28 Sep 2026</p>
-                </div>
-              </div>
-              <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 self-start sm:self-center">
-                Delivered
-              </span>
+            <div className="bg-white rounded-2xl p-10 text-center border border-emerald-950/10 shadow-soft">
+              <p className="text-gray-500 text-xs">No active or historical orders placed yet.</p>
             </div>
           </div>
         )}
@@ -309,22 +295,34 @@ const Profile = () => {
         {/* Tab 3: My Complaints */}
         {activeTab === 'complaints' && (
           <div className="space-y-4">
-            {sampleComplaints.slice(0, 2).map((item) => (
-              <div key={item.id} className="bg-white rounded-2xl p-5 border border-emerald-950/10 shadow-soft space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-xs font-bold text-emerald-800">{item.id}</span>
-                  <span className="px-3 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
-                    {item.status}
-                  </span>
-                </div>
-                <h4 className="font-bold text-gray-900 text-sm">{item.title}</h4>
-                <p className="text-xs text-gray-500">{item.description}</p>
-                <div className="pt-2 flex items-center justify-between text-[11px] text-gray-400">
-                  <span>Reported on: {item.date}</span>
-                  <span className="text-emerald-700 font-semibold">{item.officerNotes}</span>
-                </div>
+            {getMyComplaints().length === 0 ? (
+              <div className="bg-white rounded-2xl p-10 text-center border border-emerald-950/10 shadow-soft space-y-3">
+                <p className="text-gray-500 text-xs">You haven't filed any complaints or loss claims yet.</p>
+                <Link
+                  to="/complaints"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 hover:underline"
+                >
+                  <span>Report crop damage or wildlife incident</span>
+                </Link>
               </div>
-            ))}
+            ) : (
+              getMyComplaints().map((item) => (
+                <div key={item.id} className="bg-white rounded-2xl p-5 border border-emerald-950/10 shadow-soft space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-xs font-bold text-emerald-800">{item.id}</span>
+                    <span className="px-3 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
+                      {item.status || 'Pending'}
+                    </span>
+                  </div>
+                  <h4 className="font-bold text-gray-900 text-sm">{item.type || item.title}</h4>
+                  <p className="text-xs text-gray-500">{item.description}</p>
+                  <div className="pt-2 flex items-center justify-between text-[11px] text-gray-400">
+                    <span>Reported on: {item.date}</span>
+                    {item.officerNotes && <span className="text-emerald-700 font-semibold">{item.officerNotes}</span>}
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         )}
 

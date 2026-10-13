@@ -24,12 +24,27 @@ const ComplaintDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const complaintData = initialComplaints.find(c => c.id === id) || initialComplaints[0];
+  const complaintData = initialComplaints.find(c => c.id === id);
 
-  const [status, setStatus] = useState(complaintData.status);
-  const [officerNotes, setOfficerNotes] = useState(complaintData.officerNotes || '');
+  const [status, setStatus] = useState(complaintData?.status || 'Pending');
+  const [officerNotes, setOfficerNotes] = useState(complaintData?.officerNotes || '');
   const [sanctionAmount, setSanctionAmount] = useState('₹45,000');
   const [toastMessage, setToastMessage] = useState('');
+
+  if (!complaintData) {
+    return (
+      <div className="bg-white rounded-3xl p-12 text-center border border-emerald-950/10 shadow-soft space-y-4 max-w-lg mx-auto mt-10">
+        <h3 className="text-xl font-black text-[#063B2A]">Complaint Ticket Not Found</h3>
+        <p className="text-xs text-gray-500">The requested grievance ticket #{id} does not exist or has been cleared.</p>
+        <button
+          onClick={() => navigate('/admin/complaints')}
+          className="px-5 py-2.5 bg-[#063B2A] text-white rounded-xl text-xs font-bold hover:bg-emerald-950"
+        >
+          Return to Complaints Pipeline
+        </button>
+      </div>
+    );
+  }
 
   const handleSaveUpdate = (e) => {
     e.preventDefault();

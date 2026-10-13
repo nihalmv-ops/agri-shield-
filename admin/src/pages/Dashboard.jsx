@@ -209,13 +209,13 @@ const Dashboard = () => {
           </div>
           <div className="mt-3">
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl sm:text-3xl font-black text-[#063B2A]">24</span>
-              <span className="text-[11px] font-bold text-rose-600 flex items-center">↑ +8 today</span>
+              <span className="text-2xl sm:text-3xl font-black text-[#063B2A]">{alerts.length}</span>
+              <span className="text-[11px] font-bold text-emerald-600 flex items-center">Active</span>
             </div>
             <div className="mt-2 w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
-              <div className="bg-rose-500 h-full rounded-full" style={{ width: '65%' }}></div>
+              <div className="bg-emerald-500 h-full rounded-full" style={{ width: alerts.length > 0 ? '100%' : '0%' }}></div>
             </div>
-            <span className="text-[10px] text-gray-400 mt-1 block">6 critical priority</span>
+            <span className="text-[10px] text-gray-400 mt-1 block">{alerts.filter(a => a.severity === 'Critical').length} critical priority</span>
           </div>
         </div>
 
@@ -228,13 +228,13 @@ const Dashboard = () => {
           </div>
           <div className="mt-3">
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl sm:text-3xl font-black text-amber-950">12</span>
-              <span className="text-[11px] font-bold text-amber-700">4 high priority</span>
+              <span className="text-2xl sm:text-3xl font-black text-amber-950">{complaints.filter(c => c.status === 'Pending').length}</span>
+              <span className="text-[11px] font-bold text-amber-700">{complaints.filter(c => c.priority === 'Critical' || c.priority === 'High').length} high priority</span>
             </div>
             <div className="mt-2 w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
-              <div className="bg-amber-500 h-full rounded-full" style={{ width: '45%' }}></div>
+              <div className="bg-amber-500 h-full rounded-full" style={{ width: complaints.length > 0 ? '100%' : '0%' }}></div>
             </div>
-            <span className="text-[10px] text-gray-400 mt-1 block">Response SLA ~18 mins</span>
+            <span className="text-[10px] text-gray-400 mt-1 block">{complaints.length} total tickets</span>
           </div>
         </div>
 
@@ -247,13 +247,13 @@ const Dashboard = () => {
           </div>
           <div className="mt-3">
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl sm:text-3xl font-black text-teal-950">18</span>
-              <span className="text-[11px] font-bold text-teal-700">75% precision</span>
+              <span className="text-2xl sm:text-3xl font-black text-teal-950">{alerts.filter(a => a.status === 'Verified').length}</span>
+              <span className="text-[11px] font-bold text-teal-700">Confirmed</span>
             </div>
             <div className="mt-2 w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
-              <div className="bg-teal-600 h-full rounded-full" style={{ width: '75%' }}></div>
+              <div className="bg-teal-600 h-full rounded-full" style={{ width: alerts.filter(a => a.status === 'Verified').length > 0 ? '100%' : '0%' }}></div>
             </div>
-            <span className="text-[10px] text-gray-400 mt-1 block">Zero human casualties</span>
+            <span className="text-[10px] text-gray-400 mt-1 block">Ranger verified</span>
           </div>
         </div>
 
@@ -266,13 +266,13 @@ const Dashboard = () => {
           </div>
           <div className="mt-3">
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl sm:text-3xl font-black text-[#063B2A]">248</span>
-              <span className="text-[11px] font-bold text-emerald-700">+14 new</span>
+              <span className="text-2xl sm:text-3xl font-black text-[#063B2A]">0</span>
+              <span className="text-[11px] font-bold text-emerald-700">Active</span>
             </div>
             <div className="mt-2 w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
-              <div className="bg-[#10B981] h-full rounded-full" style={{ width: '85%' }}></div>
+              <div className="bg-[#10B981] h-full rounded-full" style={{ width: '0%' }}></div>
             </div>
-            <span className="text-[10px] text-gray-400 mt-1 block">1,420 registered mobile SMS</span>
+            <span className="text-[10px] text-gray-400 mt-1 block">Live enrolled growers</span>
           </div>
         </div>
 
@@ -699,7 +699,7 @@ const Dashboard = () => {
             to="/admin/alerts"
             className="inline-flex items-center gap-1.5 text-xs font-bold text-[#10B981] hover:underline"
           >
-            <span>View All 24 Alerts</span>
+            <span>View All {alerts.length} Alerts</span>
             <ArrowUpRight className="w-4 h-4" />
           </Link>
         </div>
@@ -719,7 +719,14 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {alerts.slice(0, 5).map((item) => (
+              {alerts.length === 0 ? (
+                <tr>
+                  <td colSpan="7" className="py-8 text-center text-xs text-gray-400 italic">
+                    No wildlife alerts or boundary breaches currently recorded.
+                  </td>
+                </tr>
+              ) : (
+                alerts.slice(0, 5).map((item) => (
                 <tr key={item.id} className="hover:bg-emerald-50/40 transition-colors">
                   <td className="py-3 px-4 font-bold text-gray-900">
                     <div className="flex items-center gap-3">
@@ -790,7 +797,7 @@ const Dashboard = () => {
                     </div>
                   </td>
                 </tr>
-              ))}
+              )))}
             </tbody>
           </table>
         </div>
@@ -815,7 +822,7 @@ const Dashboard = () => {
             to="/admin/complaints"
             className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 hover:underline"
           >
-            <span>View All 12 Complaints</span>
+            <span>View All {complaints.length} Complaints</span>
             <ArrowUpRight className="w-4 h-4" />
           </Link>
         </div>
@@ -835,40 +842,47 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {complaints.slice(0, 4).map((c) => (
-                <tr key={c.id} className="hover:bg-amber-50/30 transition-colors">
-                  <td className="py-3 px-4 font-mono font-bold text-[#063B2A]">
-                    {c.id}
-                  </td>
-                  <td className="py-3 px-4 font-bold text-gray-900">
-                    <div>{c.reporter}</div>
-                    <div className="text-[10px] text-gray-400 font-mono">{c.phone}</div>
-                  </td>
-                  <td className="py-3 px-4 font-semibold text-gray-700">
-                    {c.type}
-                  </td>
-                  <td className="py-3 px-4 text-gray-600">
-                    {c.location}
-                  </td>
-                  <td className="py-3 px-4 font-extrabold text-[#063B2A]">
-                    {c.compensationClaimed || 'N/A'}
-                  </td>
-                  <td className="py-3 px-4">
-                    <StatusBadge priority={c.priority} size="xs" />
-                  </td>
-                  <td className="py-3 px-4">
-                    <StatusBadge status={c.status} size="xs" />
-                  </td>
-                  <td className="py-3 px-4 text-right">
-                    <Link
-                      to={`/admin/complaints/${c.id}`}
-                      className="px-3 py-1.5 bg-[#063B2A] hover:bg-emerald-950 text-white rounded-xl text-xs font-bold transition-colors inline-block"
-                    >
-                      Process Ticket
-                    </Link>
+              {complaints.length === 0 ? (
+                <tr>
+                  <td colSpan="8" className="py-8 text-center text-xs text-gray-400 italic">
+                    No citizen grievance reports or loss claims currently pending.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                complaints.slice(0, 4).map((c) => (
+                  <tr key={c.id} className="hover:bg-amber-50/30 transition-colors">
+                    <td className="py-3 px-4 font-mono font-bold text-[#063B2A]">
+                      {c.id}
+                    </td>
+                    <td className="py-3 px-4 font-bold text-gray-900">
+                      <div>{c.reporter}</div>
+                      <div className="text-[10px] text-gray-400 font-mono">{c.phone}</div>
+                    </td>
+                    <td className="py-3 px-4 font-semibold text-gray-700">
+                      {c.type}
+                    </td>
+                    <td className="py-3 px-4 text-gray-600">
+                      {c.location}
+                    </td>
+                    <td className="py-3 px-4 font-extrabold text-[#063B2A]">
+                      {c.compensationClaimed || 'N/A'}
+                    </td>
+                    <td className="py-3 px-4">
+                      <StatusBadge priority={c.priority} size="xs" />
+                    </td>
+                    <td className="py-3 px-4">
+                      <StatusBadge status={c.status} size="xs" />
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <Link
+                        to={`/admin/complaints/${c.id}`}
+                        className="px-3 py-1.5 bg-[#063B2A] hover:bg-emerald-950 text-white rounded-xl text-xs font-bold transition-colors inline-block"
+                      >
+                        Process Ticket
+                      </Link>
+                    </td>
+                  </tr>
+                )))}
             </tbody>
           </table>
         </div>

@@ -25,39 +25,25 @@ const setStored = (key, value) => {
   }
 };
 
-// Initialize products from sample data if not already present
+// Read all products from localStorage (clean - no demo products)
 export const getProducts = () => {
   const products = getStored(PRODUCTS_KEY, null);
-  if (!products || !Array.isArray(products) || products.length === 0) {
-    setStored(PRODUCTS_KEY, initialMarketplaceProducts);
-    return initialMarketplaceProducts;
+  if (!products || !Array.isArray(products)) {
+    return [];
   }
-  return products;
+  // Strip out old demo products (prod-001 through prod-008) if present in browser localStorage
+  const clean = products.filter((p) => !p.id || !String(p.id).match(/^prod-00[1-8]$/));
+  if (clean.length !== products.length) {
+    setStored(PRODUCTS_KEY, clean);
+  }
+  return clean;
 };
 
 // Get a single product by ID
 export const getProductById = (id) => {
   const products = getProducts();
   const found = products.find((p) => String(p.id) === String(id));
-  if (found) return found;
-
-  // Fallback to sampleProducts if ID came from legacy mock data
-  const legacyFound = sampleProducts.find((p) => String(p.id) === String(id));
-  if (legacyFound) {
-    return {
-      ...legacyFound,
-      district: legacyFound.location ? legacyFound.location.split(',')[0].trim() : 'Kerala',
-      priceUnit: legacyFound.unit || 'kg',
-      quantity: legacyFound.quantityAvailable || 100,
-      sellerName: legacyFound.seller ? legacyFound.seller.name : 'Local Farmer',
-      sellerPhone: legacyFound.seller ? legacyFound.seller.phone : '+91 98471 23456',
-      sellerWhatsApp: '919847123456',
-      sellerBio: legacyFound.seller ? legacyFound.seller.farmName : '',
-      sellerMemberSince: 'Member since 2024',
-      images: [legacyFound.image]
-    };
-  }
-  return null;
+  return found || null;
 };
 
 // Add a new product listing (owner is set to true)
@@ -131,7 +117,7 @@ export const toggleSoldStatus = (id) => {
 // Get listings belonging to current user / owner
 export const getOwnerProducts = () => {
   const products = getProducts();
-  return products.filter((p) => p.isOwner === true || p.sellerId === 'seller-current-user' || p.sellerId === 'seller-rahul');
+  return products.filter((p) => p.isOwner === true || p.sellerId === 'seller-current-user');
 };
 
 // Get listings by specific seller ID
@@ -142,7 +128,14 @@ export const getSellerProducts = (sellerId) => {
 
 // --- Favorites Management ---
 export const getFavorites = () => {
-  return getStored(FAVORITES_KEY, ['prod-001', 'prod-005']);
+  const raw = getStored(FAVORITES_KEY, []);
+  if (!Array.isArray(raw)) return [];
+  // Strip out old demo favorite IDs
+  const clean = raw.filter((id) => !String(id).match(/^prod-00[1-8]$/));
+  if (clean.length !== raw.length) {
+    setStored(FAVORITES_KEY, clean);
+  }
+  return clean;
 };
 
 export const isFavorite = (productId) => {

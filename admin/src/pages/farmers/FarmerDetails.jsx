@@ -24,14 +24,29 @@ import { initialComplaints } from '../../data/complaints';
 
 const FarmerDetails = () => {
   const { id } = useParams();
-  const farmer = initialFarmers.find(f => f.id === id) || initialFarmers[0];
+  const farmer = initialFarmers.find(f => f.id === id);
 
-  const [status, setStatus] = useState(farmer.status);
+  const [status, setStatus] = useState(farmer?.status || 'Active');
   const [toastMessage, setToastMessage] = useState('');
+
+  if (!farmer) {
+    return (
+      <div className="bg-white rounded-3xl p-12 text-center border border-emerald-950/10 shadow-soft space-y-4 max-w-lg mx-auto mt-10">
+        <h3 className="text-xl font-black text-[#063B2A]">Farmer Profile Not Found</h3>
+        <p className="text-xs text-gray-500">The requested farmer record #{id} does not exist or has been removed.</p>
+        <button
+          onClick={() => navigate('/admin/farmers')}
+          className="px-5 py-2.5 bg-[#063B2A] text-white rounded-xl text-xs font-bold hover:bg-emerald-950"
+        >
+          Return to Farmers Directory
+        </button>
+      </div>
+    );
+  }
 
   // Find complaints filed by this farmer
   const farmerComplaints = initialComplaints.filter(c => 
-    c.reporter.toLowerCase().includes(farmer.name.toLowerCase()) || 
+    c.reporter?.toLowerCase().includes(farmer.name?.toLowerCase()) || 
     c.phone === farmer.phone
   );
 

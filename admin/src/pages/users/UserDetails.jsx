@@ -18,10 +18,26 @@ import { initialUsers } from '../../data/users';
 
 const UserDetails = () => {
   const { id } = useParams();
-  const user = initialUsers.find(u => u.id === id) || initialUsers[0];
+  const navigate = useNavigate();
+  const user = initialUsers.find(u => u.id === id);
 
-  const [status, setStatus] = useState(user.status);
+  const [status, setStatus] = useState(user?.status || 'Active');
   const [toastMessage, setToastMessage] = useState('');
+
+  if (!user) {
+    return (
+      <div className="bg-white rounded-3xl p-12 text-center border border-emerald-950/10 shadow-soft space-y-4 max-w-lg mx-auto mt-10">
+        <h3 className="text-xl font-black text-[#063B2A]">User Account Not Found</h3>
+        <p className="text-xs text-gray-500">The requested user profile #{id} does not exist or has been removed.</p>
+        <button
+          onClick={() => navigate('/admin/users')}
+          className="px-5 py-2.5 bg-[#063B2A] text-white rounded-xl text-xs font-bold hover:bg-emerald-950"
+        >
+          Return to User Directory
+        </button>
+      </div>
+    );
+  }
 
   const handleToggleStatus = () => {
     const nextStatus = status === 'Active' ? 'Suspended' : 'Active';

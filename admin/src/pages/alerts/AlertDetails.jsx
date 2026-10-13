@@ -27,12 +27,27 @@ const AlertDetails = () => {
   const navigate = useNavigate();
 
   // Find alert from dataset or fallback
-  const alertData = initialWildlifeAlerts.find(a => a.id === id) || initialWildlifeAlerts[0];
+  const alertData = initialWildlifeAlerts.find(a => a.id === id);
 
-  const [currentStatus, setCurrentStatus] = useState(alertData.status);
-  const [officerNotes, setOfficerNotes] = useState(alertData.officerNotes || '');
+  const [currentStatus, setCurrentStatus] = useState(alertData?.status || 'Pending Verification');
+  const [officerNotes, setOfficerNotes] = useState(alertData?.officerNotes || '');
   const [notificationStatus, setNotificationStatus] = useState('');
   const [squadDispatched, setSquadDispatched] = useState(false);
+
+  if (!alertData) {
+    return (
+      <div className="bg-white rounded-3xl p-12 text-center border border-emerald-950/10 shadow-soft space-y-4 max-w-lg mx-auto mt-10">
+        <h3 className="text-xl font-black text-[#063B2A]">Wildlife Alert Not Found</h3>
+        <p className="text-xs text-gray-500">The requested alert record #{id} does not exist or has been cleared.</p>
+        <button
+          onClick={() => navigate('/admin/alerts')}
+          className="px-5 py-2.5 bg-[#063B2A] text-white rounded-xl text-xs font-bold hover:bg-emerald-950"
+        >
+          Return to Wildlife Alerts
+        </button>
+      </div>
+    );
+  }
 
   const handleSaveAssessment = (e) => {
     e.preventDefault();

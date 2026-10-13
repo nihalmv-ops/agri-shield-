@@ -391,8 +391,18 @@ const Alerts = () => {
         </div>
       </div>
 
-      {/* VIEW 1: Camera Grid View */}
-      {viewMode === 'grid' && (
+      {filteredAlerts.length === 0 ? (
+        <EmptyState
+          icon="ShieldAlert"
+          title="No Wildlife Alerts Recorded"
+          description="No animal detections or perimeter breaches recorded yet. You can broadcast an emergency alert to farmers or await optical sensor camera traps."
+          actionLabel="Broadcast Alert to Farmers"
+          onAction={() => setShowBroadcastModal(true)}
+        />
+      ) : (
+        <>
+          {/* VIEW 1: Camera Grid View */}
+          {viewMode === 'grid' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredAlerts.map((item) => (
             <div
@@ -641,6 +651,8 @@ const Alerts = () => {
             </div>
           ))}
         </div>
+      )}
+        </>
       )}
 
       {/* Quick Inspection Modal */}
